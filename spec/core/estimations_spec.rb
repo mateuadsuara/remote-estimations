@@ -402,9 +402,9 @@ RSpec.describe Core::Estimations do
       expect(pert(estimates)).to eq 6.5
     end
 
-    it 'is 11.5 when only one user estimated with 1, 10, 10' do
-      estimates = [[1, 10, 10]]
-      expect(pert(estimates)).to eq 11.5
+    it 'is 10.75 when only one user estimated with 1, 9, 10' do
+      estimates = [[1, 9, 10]]
+      expect(pert(estimates)).to eq 10.75
     end
 
     it 'takes the most optimistic across all users' do
