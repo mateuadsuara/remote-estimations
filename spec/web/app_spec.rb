@@ -1,11 +1,11 @@
-require 'web_app'
+require 'web/app'
 
-RSpec.describe WebApp do
+RSpec.describe Web::App do
   it 'responds ok' do
     expect(status_code(get_response({}))).to eq 200
   end
 
-  def get_response(environment)
+  def get_response(environment = nil)
     described_class.new.call(environment)
   end
 

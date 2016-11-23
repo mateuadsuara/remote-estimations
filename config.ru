@@ -1,4 +1,4 @@
 $: << File.expand_path('lib/', File.dirname(__FILE__))
-require 'web_app'
+require 'web/app'
 
-run WebApp.new
+aun Web::App.new
