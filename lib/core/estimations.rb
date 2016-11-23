@@ -37,6 +37,7 @@ module Core
     def estimate(name:, user:, optimistic:, realistic:, pessimistic:)
       estimation = @estimations.find{|e|e[:name] == name}
       return Result.failure(:nonexistent_name) if !estimation
+      return Result.failure(:completed_previously) if estimation[:completed]
       return Result.failure(:user_estimated_previously) if estimation[:estimates][user]
       return Result.failure(:absurd_estimation) if realistic < optimistic || pessimistic < realistic
 

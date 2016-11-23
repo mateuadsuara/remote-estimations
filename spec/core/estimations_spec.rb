@@ -55,6 +55,27 @@ RSpec.describe Core::Estimations do
     expect(estimations.completed).to eq []
   end
 
+  it 'cannot be estimated after completed' do
+    estimations.add(
+      name: "::the name::",
+      description: ""
+    )
+    estimations.complete(
+      name: "::the name::"
+    )
+    estimation = estimations.estimate(
+      name: "::the name::",
+      user: "::the user::",
+      optimistic: 1,
+      realistic: 2,
+      pessimistic: 4
+    )
+
+    expect(estimation).to eq Result.failure(:completed_previously)
+    expect(estimations.in_progress).to eq []
+    expect(estimations.completed.first[:estimates]).to eq({})
+  end
+
   it 'can take estimates for the matching name' do
     estimations.add(
       name: "::matching::",
