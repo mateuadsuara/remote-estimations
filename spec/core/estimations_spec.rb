@@ -313,6 +313,13 @@ RSpec.describe Core::Estimations do
       name: "::estimation3::",
       description: "::description3::"
     )
+    estimations.add(
+      name: "::estimation4::",
+      description: "::description4::"
+    )
+    estimations.complete(
+      name: "::estimation4::"
+    )
 
     expect(estimations.completed).to eq([
       {
@@ -343,6 +350,12 @@ RSpec.describe Core::Estimations do
             pessimistic: 8
           }
         }
+      },
+      {
+        name: "::estimation4::",
+        description: "::description4::",
+        estimate: nil,
+        estimates: {}
       }
     ])
   end
