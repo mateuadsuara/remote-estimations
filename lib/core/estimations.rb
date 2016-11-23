@@ -63,11 +63,9 @@ module Core
       @estimations.select do |estimation|
         !estimation[:completed]
       end.map do |estimation|
-        {
-          name: estimation[:name],
-          description: estimation[:description],
-          estimates: estimation[:estimates].keys
-        }
+        estimation.delete(:completed)
+        estimation[:estimates] = estimation[:estimates].keys
+        estimation
       end
     end
 
