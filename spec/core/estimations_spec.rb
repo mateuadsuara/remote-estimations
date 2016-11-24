@@ -41,6 +41,17 @@ RSpec.describe Core::Estimations do
     }]
   end
 
+  it 'cannot add with empty name' do
+    addition = estimations.add(
+      name: "    ",
+      description: "::the description 1::"
+    )
+
+    expect(addition).to eq Result.failure(:empty_name)
+    expect(estimations.in_progress).to eq []
+    expect(estimations.completed).to eq []
+  end
+
   it 'cannot be estimated before added' do
     estimation = estimations.estimate(
       name: "::nonexistent name::",
@@ -55,25 +66,56 @@ RSpec.describe Core::Estimations do
     expect(estimations.completed).to eq []
   end
 
+  it 'cannot be completed before added' do
+    completion = estimations.complete(
+      name: "::nonexistent name::"
+    )
+
+    expect(completion).to eq Result.failure(:nonexistent_name)
+    expect(estimations.in_progress).to eq []
+    expect(estimations.completed).to eq []
+  end
+
+  it 'cannot be completed before estimated' do
+    estimations.add(
+      name: "::the name::",
+      description: "::the description::"
+    )
+    completion = estimations.complete(
+      name: "::the name::"
+    )
+
+    expect(completion).to eq Result.failure(:unestimated)
+    expect(estimations.in_progress.length).to eq 1
+    expect(estimations.completed).to eq []
+  end
+
   it 'cannot be estimated after completed' do
     estimations.add(
       name: "::the name::",
       description: ""
+    )
+    estimations.estimate(
+      name: "::the name::",
+      user: "::the user 1::",
+      optimistic: 1,
+      realistic: 2,
+      pessimistic: 4
     )
     estimations.complete(
       name: "::the name::"
     )
     estimation = estimations.estimate(
       name: "::the name::",
-      user: "::the user::",
-      optimistic: 1,
-      realistic: 2,
+      user: "::the user 2::",
+      optimistic: 4,
+      realistic: 4,
       pessimistic: 4
     )
 
     expect(estimation).to eq Result.failure(:completed_previously)
     expect(estimations.in_progress).to eq []
-    expect(estimations.completed.first[:estimates]).to eq({})
+    expect(estimations.completed.length).to eq 1
   end
 
   it 'can take estimates for the matching name' do
@@ -201,10 +243,34 @@ RSpec.describe Core::Estimations do
     expect(estimations.in_progress.first[:estimates]).to eq([])
   end
 
+  it 'cannot have a negative estimate on optimistic' do
+    estimations.add(
+      name: "::the name::",
+      description: "::the description::"
+    )
+    estimation = estimations.estimate(
+      name: "::the name::",
+      user: "::the user::",
+      optimistic: -1,
+      realistic: 0,
+      pessimistic: 1
+    )
+
+    expect(estimation).to eq Result.failure(:absurd_estimation)
+    expect(estimations.in_progress.first[:estimates]).to eq([])
+  end
+
   it 'cannot be completed twice' do
     estimations.add(
       name: "::the name::",
       description: "::the description::"
+    )
+    estimations.estimate(
+      name: "::the name::",
+      user: "::the user::",
+      optimistic: 1,
+      realistic: 2,
+      pessimistic: 4
     )
     first_completion = estimations.complete(
       name: "::the name::"
@@ -217,16 +283,6 @@ RSpec.describe Core::Estimations do
     expect(second_completion).to eq Result.failure(:completed_previously)
     expect(estimations.in_progress).to eq []
     expect(estimations.completed.length).to eq 1
-  end
-
-  it 'cannot complete an unexistent name' do
-    completion = estimations.complete(
-      name: "::nonexistent name::"
-    )
-
-    expect(completion).to eq Result.failure(:nonexistent_name)
-    expect(estimations.in_progress).to eq []
-    expect(estimations.completed).to eq []
   end
 
   it 'that are in progress show which users already estimated' do
@@ -313,13 +369,6 @@ RSpec.describe Core::Estimations do
       name: "::estimation3::",
       description: "::description3::"
     )
-    estimations.add(
-      name: "::estimation4::",
-      description: "::description4::"
-    )
-    estimations.complete(
-      name: "::estimation4::"
-    )
 
     expect(estimations.completed).to eq([
       {
@@ -350,12 +399,6 @@ RSpec.describe Core::Estimations do
             pessimistic: 8
           }
         }
-      },
-      {
-        name: "::estimation4::",
-        description: "::description4::",
-        estimate: nil,
-        estimates: {}
       }
     ])
   end
@@ -385,11 +428,6 @@ RSpec.describe Core::Estimations do
       )
 
       estimations.completed.first[:estimate]
-    end
-
-    it 'is missing when no user estimated' do
-      estimates = []
-      expect(pert(estimates)).to eq nil
     end
 
     it 'is 1 when only one user estimated with 1, 1, 1' do

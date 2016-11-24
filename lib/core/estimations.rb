@@ -7,6 +7,7 @@ module Core
     end
 
     def add(name:, description:)
+      return Result.failure(:empty_name) if name.strip.empty?
       estimation = @estimations.find{|e|e[:name] == name}
       return Result.failure(:added_previously) if estimation
 
@@ -23,6 +24,7 @@ module Core
       estimation = @estimations.find{|e|e[:name] == name}
       return Result.failure(:nonexistent_name) if !estimation
       return Result.failure(:completed_previously) if estimation[:completed]
+      return Result.failure(:unestimated) if estimation[:estimates].empty?
 
       @estimations.map! do |estimation|
         if estimation[:name] == name
@@ -39,7 +41,7 @@ module Core
       return Result.failure(:nonexistent_name) if !estimation
       return Result.failure(:completed_previously) if estimation[:completed]
       return Result.failure(:user_estimated_previously) if estimation[:estimates][user]
-      return Result.failure(:absurd_estimation) if realistic < optimistic || pessimistic < realistic
+      return Result.failure(:absurd_estimation) if realistic < optimistic || pessimistic < realistic || optimistic < 0
 
       @estimations.map! do |estimation|
         if estimation[:name] == name
