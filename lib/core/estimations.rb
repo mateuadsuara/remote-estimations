@@ -37,6 +37,7 @@ module Core
     end
 
     def estimate(name:, user:, optimistic:, realistic:, pessimistic:)
+      return Result.failure(:empty_user) if user.strip.empty?
       estimation = @estimations.find{|e|e[:name] == name}
       return Result.failure(:nonexistent_name) if !estimation
       return Result.failure(:completed_previously) if estimation[:completed]

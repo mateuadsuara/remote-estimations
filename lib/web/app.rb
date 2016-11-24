@@ -18,13 +18,16 @@ module Web
 
       if environment["REQUEST_METHOD"] == "POST" && environment["PATH_INFO"] == "/estimate"
         params = params(environment)
-        @estimations.estimate(
-          name: params["name"].first,
-          user: params["user"].first,
-          optimistic: params["optimistic"].first.to_i,
-          realistic: params["realistic"].first.to_i,
-          pessimistic: params["pessimistic"].first.to_i
-        )
+        begin
+          @estimations.estimate(
+            name: params["name"].first,
+            user: params["user"].first,
+            optimistic: Integer(params["optimistic"].first),
+            realistic: Integer(params["realistic"].first),
+            pessimistic: Integer(params["pessimistic"].first)
+          )
+        rescue
+        end
         return ['302', {'Location' => '/'}, []]
       end
 

@@ -52,6 +52,23 @@ RSpec.describe Core::Estimations do
     expect(estimations.completed).to eq []
   end
 
+  it 'cannot estimate with empty user' do
+    estimations.add(
+      name: "::the name::",
+      description: "::the description::"
+    )
+    estimation = estimations.estimate(
+      name: "::the name::",
+      user: "     ",
+      optimistic: 1,
+      realistic: 2,
+      pessimistic: 4
+    )
+
+    expect(estimation).to eq Result.failure(:empty_user)
+    expect(estimations.in_progress.first[:estimates]).to eq []
+  end
+
   it 'cannot be estimated before added' do
     estimation = estimations.estimate(
       name: "::nonexistent name::",

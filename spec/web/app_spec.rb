@@ -103,6 +103,18 @@ RSpec.describe Web::App do
     )
   end
 
+  it 'does not submit an invalid estimate' do
+    post "/estimate", {
+      "name"=>"::the name::",
+      "user"=>"::the user::",
+      "optimistic"=>"",
+      "realistic"=>"",
+      "pessimistic"=>""
+    }
+
+    expect(estimations).to_not have_received(:estimate)
+  end
+
   it 'completes an estimation' do
     post "/complete", {"name"=>"::the name::"}
 
