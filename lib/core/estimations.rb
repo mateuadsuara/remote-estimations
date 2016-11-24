@@ -63,9 +63,10 @@ module Core
       @estimations.select do |estimation|
         !estimation[:completed]
       end.map do |estimation|
-        estimation.delete(:completed)
-        estimation[:estimates] = estimation[:estimates].keys
-        estimation
+        h = estimation.clone
+        h.delete(:completed)
+        h[:estimates] = estimation[:estimates].keys
+        h
       end
     end
 
@@ -73,9 +74,10 @@ module Core
       @estimations.select do |estimation|
         estimation[:completed]
       end.map do |estimation|
-        estimation.delete(:completed)
-        estimation[:estimate] = pert(estimation)
-        estimation
+        h = estimation.clone
+        h.delete(:completed)
+        h[:estimate] = pert(estimation)
+        h
       end
     end
 
