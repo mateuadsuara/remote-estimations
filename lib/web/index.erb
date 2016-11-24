@@ -2,29 +2,35 @@
 <html>
 <head>
   <style>
+    body, input[type=submit] {
+      font-family: monospace;
+    }
+    div[data-in-progress], div[data-completed] {
+      margin-bottom: 1em;
+    }
   </style>
   <title>Estimate!</title>
 </head>
 <body>
-  <h1>Add estimation:</h1>
+  <h1>New estimation</h1>
   <form action="add" method="post">
-    name:<input type="text" name="name" value="">
+    name: <input type="text" name="name" value="">
     <input type="submit" value="Add">
   </form>
 
   <h1>In progress</h1>
   <% estimations.in_progress.each do |estimation| %>
     <div data-in-progress>
-      <span data-estimation-name><%= estimation[:name] %></span>
-      <% estimation[:estimates].each do |user| %>
+      Estimation for: <b><span data-estimation-name><%= estimation[:name] %></span></b></br>
+      Estimates received: <% estimation[:estimates].each do |user| %>
         <span data-user-name><%= user %></span>
       <% end %>
       <form action="estimate" method="post">
         <input type="hidden" name="name" value="<%= estimation[:name] %>">
-        user:<input type="text" name="user" value="">
-        optimistic:<input type="number" name="optimistic" value="">
-        realistic:<input type="number" name="realistic" value="">
-        pessimistic:<input type="number" name="pessimistic" value="">
+        user: <input type="text" name="user" value="">
+        optimistic: <input type="number" name="optimistic" value="">
+        realistic: <input type="number" name="realistic" value="">
+        pessimistic: <input type="number" name="pessimistic" value="">
         <input type="submit" value="Submit estimate">
       </form>
       <form action="complete" method="post">

@@ -13,6 +13,7 @@ module Web
           name: params["name"].first,
           description: ""
         )
+        return ['302', {'Location' => '/'}, []]
       end
 
       if environment["REQUEST_METHOD"] == "POST" && environment["PATH_INFO"] == "/estimate"
@@ -20,10 +21,11 @@ module Web
         @estimations.estimate(
           name: params["name"].first,
           user: params["user"].first,
-          optimistic: Integer(params["optimistic"].first),
-          realistic: Integer(params["realistic"].first),
-          pessimistic: Integer(params["pessimistic"].first)
+          optimistic: params["optimistic"].first.to_i,
+          realistic: params["realistic"].first.to_i,
+          pessimistic: params["pessimistic"].first.to_i
         )
+        return ['302', {'Location' => '/'}, []]
       end
 
       if environment["REQUEST_METHOD"] == "POST" && environment["PATH_INFO"] == "/complete"
@@ -31,6 +33,7 @@ module Web
         @estimations.complete(
           name: params["name"].first
         )
+        return ['302', {'Location' => '/'}, []]
       end
 
       html = render('index', @estimations)
