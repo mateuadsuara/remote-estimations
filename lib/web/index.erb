@@ -2,6 +2,9 @@
 <html>
 <head>
   <style>
+    div[data-error] {
+      background-color: red;
+    }
     body, input[type=submit] {
       font-family: monospace;
     }
@@ -12,6 +15,10 @@
   <title>Estimate!</title>
 </head>
 <body>
+  <% if error %>
+    <div data-error><%= error %></div>
+  <% end %>
+
   <h1>New estimation</h1>
   <form action="add" method="post">
     name: <input type="text" name="name" value="">
@@ -44,7 +51,7 @@
   <% estimations.completed.each do |estimation| %>
     <div data-completed>
       <span data-estimation-name><%= estimation[:name] %></span>
-      <span data-final-estimate><%= estimation[:estimate] || "-" %></span>
+       = <span data-final-estimate><%= estimation[:estimate] || "-" %></span>
       <% estimation[:estimates].each do |user, estimate| %>
         <div data-user-estimate>
           <span data-user-name><%= user %></span>

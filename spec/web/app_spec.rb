@@ -13,6 +13,12 @@ RSpec.describe Web::App do
     expect(estimations).to receive(method).and_return(return_value)
   end
 
+  before(:each) do
+    [:add, :estimate, :complete].each do |action|
+      allow(estimations).to receive(action).and_return(Result.success)
+    end
+  end
+
   it 'on index shows in progress estimations' do
     given(:in_progress, [
       {name: "name1", estimates: ["user1", "user2"]},
@@ -160,5 +166,17 @@ RSpec.describe Web::App do
     expect(form).not_to eq nil
     expect(form.css('input[type="submit"]').length).to eq 1
     expect(form.css('input[name="name"]').length).to eq 1
+  end
+
+  it 'displays the errors' do
+    get "/?error=the_error"
+
+    expect(html.css('[data-error]').map(&:text)).to eq ["the_error"]
+  end
+
+  it 'does not display error' do
+    get "/"
+
+    expect(html.css('[data-error]').length).to eq 0
   end
 end

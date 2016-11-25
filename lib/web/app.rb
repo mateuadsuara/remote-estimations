@@ -8,18 +8,18 @@ module Web
 
     def call(environment)
       if environment["REQUEST_METHOD"] == "POST" && environment["PATH_INFO"] == "/add"
-        params = params(environment)
-        @estimations.add(
+        params = post_params(environment)
+        addition = @estimations.add(
           name: params["name"].first,
           description: ""
         )
-        return ['302', {'Location' => '/'}, []]
+        return redirect(addition)
       end
 
       if environment["REQUEST_METHOD"] == "POST" && environment["PATH_INFO"] == "/estimate"
-        params = params(environment)
+        params = post_params(environment)
         begin
-          @estimations.estimate(
+          estimate = @estimations.estimate(
             name: params["name"].first,
             user: params["user"].first,
             optimistic: Integer(params["optimistic"].first),
@@ -27,29 +27,45 @@ module Web
             pessimistic: Integer(params["pessimistic"].first)
           )
         rescue
+          estimate = Result.failure(:non_numeric_estimation)
         end
-        return ['302', {'Location' => '/'}, []]
+        return redirect(estimate)
       end
 
       if environment["REQUEST_METHOD"] == "POST" && environment["PATH_INFO"] == "/complete"
-        params = params(environment)
-        @estimations.complete(
+        params = post_params(environment)
+        completion = @estimations.complete(
           name: params["name"].first
         )
-        return ['302', {'Location' => '/'}, []]
+        return redirect(completion)
       end
 
-      html = render('index', @estimations)
+      params = get_params(environment)
+      error = params["error"]&.first
+      html = render('index', @estimations, error)
       ['200', {'Content-Type' => 'text/html'}, [html]]
     end
 
     private
-    def render(template, estimations)
+    def render(template, estimations, error = nil)
       ERB.new(File.new(File.expand_path(File.dirname(__FILE__) + "/#{template}.erb")).read).result(binding)
     end
 
-    def params(environment)
+    def post_params(environment)
       CGI::parse(environment["rack.input"].gets)
+    end
+
+    def get_params(environment)
+      CGI::parse(environment["QUERY_STRING"])
+    end
+
+    def redirect(result)
+      result.succeeded do
+        return ['302', {'Location' => '/'}, []]
+      end
+      result.failed do |error|
+        return ['302', {'Location' => "/?error=#{error}"}, []]
+      end
     end
   end
 end
