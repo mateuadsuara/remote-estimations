@@ -7,65 +7,51 @@ module Web
     end
 
     def call(environment)
-      if environment["REQUEST_METHOD"] == "POST" && environment["PATH_INFO"] == "/add"
-        params = post_params(environment)
-        addition = @estimations.add(
-          name: params["name"].first,
-          description: ""
-        )
-        return redirect(addition)
+      if environment["REQUEST_METHOD"] == "POST"
+        action = post_action(environment)
+        params = parse_post_params(environment)
+        result = @estimations.send(action, **params)
+        return redirect(result)
       end
 
-      if environment["REQUEST_METHOD"] == "POST" && environment["PATH_INFO"] == "/estimate"
-        params = post_params(environment)
-        begin
-          estimate = @estimations.estimate(
-            name: params["name"].first,
-            user: params["user"].first,
-            optimistic: Integer(params["optimistic"].first),
-            realistic: Integer(params["realistic"].first),
-            pessimistic: Integer(params["pessimistic"].first)
-          )
-        rescue
-          estimate = Result.failure(:non_numeric_estimation)
-        end
-        return redirect(estimate)
-      end
-
-      if environment["REQUEST_METHOD"] == "POST" && environment["PATH_INFO"] == "/complete"
-        params = post_params(environment)
-        completion = @estimations.complete(
-          name: params["name"].first
-        )
-        return redirect(completion)
-      end
-
-      params = get_params(environment)
-      error = params["error"]&.first
-      html = render('index', @estimations, error)
+      maybe_error = parse_error(environment)
+      html = render('index', @estimations, maybe_error)
       ['200', {'Content-Type' => 'text/html'}, [html]]
     end
 
     private
-    def render(template, estimations, error = nil)
+    def render(template, estimations, maybe_error)
       ERB.new(File.new(File.expand_path(File.dirname(__FILE__) + "/#{template}.erb")).read).result(binding)
     end
 
-    def post_params(environment)
-      CGI::parse(environment["rack.input"].gets)
+    def post_action(environment)
+      environment["PATH_INFO"].scan(/\/([a-z]*)/).first.first.to_sym
     end
 
-    def get_params(environment)
-      CGI::parse(environment["QUERY_STRING"])
+    def parse_post_params(environment)
+      body = environment["rack.input"].gets
+
+      params = CGI::parse(body).map do |key, values|
+        [key.to_sym, values.first]
+      end.to_h
+
+      [:optimistic, :realistic, :pessimistic].each do |f|
+        params[f] = Integer(params[f]) if params[f]
+      end
+
+      params
+    end
+
+    def parse_error(environment)
+      get_params = CGI::parse(environment["QUERY_STRING"])
+      get_params["error"]&.first
     end
 
     def redirect(result)
-      result.succeeded do
-        return ['302', {'Location' => '/'}, []]
-      end
-      result.failed do |error|
-        return ['302', {'Location' => "/?error=#{error}"}, []]
-      end
+      location ||= result.succeeded { '/' }
+      location ||= result.failed { |reason| "/?error=#{reason}" }
+
+      return ['302', {'Location' => location}, []]
     end
   end
 end

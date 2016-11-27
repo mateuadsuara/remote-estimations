@@ -15,13 +15,14 @@
   <title>Estimate!</title>
 </head>
 <body>
-  <% if error %>
-    <div data-error><%= error %></div>
+  <% if maybe_error %>
+    <div data-error><%= maybe_error %></div>
   <% end %>
 
   <h1>New estimation</h1>
   <form action="add" method="post">
-    name: <input type="text" name="name" value="">
+    name: <input type="text" name="name" value="" required>
+    <input type="hidden" name="description" value="">
     <input type="submit" value="Add">
   </form>
 
@@ -34,10 +35,10 @@
       <% end %>
       <form action="estimate" method="post">
         <input type="hidden" name="name" value="<%= estimation[:name] %>">
-        user: <input type="text" name="user" value="">
-        optimistic: <input type="number" name="optimistic" value="">
-        realistic: <input type="number" name="realistic" value="">
-        pessimistic: <input type="number" name="pessimistic" value="">
+        user: <input type="text" name="user" value="" required>
+        optimistic: <input type="number" name="optimistic" value="" required>
+        realistic: <input type="number" name="realistic" value="" required>
+        pessimistic: <input type="number" name="pessimistic" value="" required>
         <input type="submit" value="Submit estimate">
       </form>
       <form action="complete" method="post">

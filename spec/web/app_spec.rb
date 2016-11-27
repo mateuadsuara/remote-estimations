@@ -83,7 +83,7 @@ RSpec.describe Web::App do
   end
 
   it 'adds an estimation' do
-    post "/add", {"name"=>"::the name::"}
+    post "/add", {"name"=>"::the name::", "description"=>""}
 
     expect(estimations).to have_received(:add).with(
       name: "::the name::",
@@ -109,16 +109,17 @@ RSpec.describe Web::App do
     )
   end
 
-  it 'does not submit an invalid estimate' do
-    post "/estimate", {
-      "name"=>"::the name::",
-      "user"=>"::the user::",
-      "optimistic"=>"",
-      "realistic"=>"",
-      "pessimistic"=>""
-    }
+  ["optimistic", "realistic", "pessimistic"].each do |estimate|
+    it "requires the #{estimate} estimate" do
+      given(:in_progress, [
+        {name: "name1", estimates: []}
+      ])
 
-    expect(estimations).to_not have_received(:estimate)
+      get "/"
+
+      attributes = html.css("input[name=#{estimate}]").first.attributes
+      expect(attributes).to include "required"
+    end
   end
 
   it 'completes an estimation' do
