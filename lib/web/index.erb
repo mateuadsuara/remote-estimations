@@ -9,7 +9,16 @@
       font-family: monospace;
     }
     div[data-in-progress], div[data-completed] {
-      margin-bottom: 1em;
+      margin-bottom: 3em;
+    }
+    [data-estimation-name] {
+      font-weight: bold;
+    }
+    [data-estimation-name]:before {
+      content: open-quote;
+    }
+    [data-estimation-name]:after {
+      content: close-quote;
     }
   </style>
   <title>Estimate!</title>
@@ -19,43 +28,46 @@
     <div data-error><%= maybe_error %></div>
   <% end %>
 
-  <h1>New estimation</h1>
   <form action="add" method="post">
-    name: <input type="text" name="name" value="" required>
-    <input type="hidden" name="description" value="">
-    <input type="submit" value="Add">
+    I would like to get an estimate for the story: <input type="text" name="name" value="" required>.
+    <input type="hidden" name="description" value=""></br>
+    <input type="submit" value="Please, estimate it.">
   </form>
 
-  <h1>In progress</h1>
+  <h1>Stories currently being estimated:</h1>
   <% estimations.in_progress.each do |estimation| %>
     <div data-in-progress>
-      Estimation for: <b><span data-estimation-name><%= estimation[:name] %></span></b></br>
-      Estimates received: <% estimation[:estimates].each do |user| %>
-        <span data-user-name><%= user %></span>
+      We are estimating the story <span data-estimation-name><%= estimation[:name] %></span> here.
+      </br>
+      <% if estimation[:estimates].empty? %>
+        No one estimated yet.
+        </br>
+      <% else %>
+        We have the estimates from <%= estimation[:estimates].map{|user| "<span data-user-name>#{user}</span>"}.join(", ") %>.
+        <form action="complete" method="post">
+          <input type="hidden" name="name" value="<%= estimation[:name] %>">
+          <input type="submit" value="I think we are done. That's everyone we wanted input from.">
+        </form>
       <% end %>
+      </br>
       <form action="estimate" method="post">
         <input type="hidden" name="name" value="<%= estimation[:name] %>">
-        user: <input type="text" name="user" value="" required>
-        optimistic: <input type="number" name="optimistic" value="" required>
-        realistic: <input type="number" name="realistic" value="" required>
-        pessimistic: <input type="number" name="pessimistic" value="" required>
-        <input type="submit" value="Submit estimate">
-      </form>
-      <form action="complete" method="post">
-        <input type="hidden" name="name" value="<%= estimation[:name] %>">
-        <input type="submit" value="Complete estimation">
+        I am <input type="text" name="user" value="" required>.</br>
+        If I think optimistically, <span data-estimation-name><%= estimation[:name] %></span> could take <input type="number" name="optimistic" value="" required> points to achieve. </br>
+        Thinking realistically, I guess it would take <input type="number" name="realistic" value="" required> points. </br>
+        And being pessimistic, it might take <input type="number" name="pessimistic" value="" required> points.</br>
+        <input type="submit" value="I think that's about right. Please, take my point of view into consideration.">
       </form>
     </div>
   <% end %>
 
-  <h1>Completed</h1>
+  <h1>Completed estimations:</h1>
   <% estimations.completed.each do |estimation| %>
     <div data-completed>
-      <span data-estimation-name><%= estimation[:name] %></span>
-       = <span data-final-estimate><%= estimation[:estimate] || "-" %></span>
+      The story <span data-estimation-name><%= estimation[:name] %></span> has been estimated to take <span data-final-estimate><%= estimation[:estimate] || "-" %></span> points.
       <% estimation[:estimates].each do |user, estimate| %>
         <div data-user-estimate>
-          <span data-user-name><%= user %></span>
+          <span data-user-name><%= user %></span> estimated it as
           <span data-user-estimates><%= "#{estimate[:optimistic]}/#{estimate[:realistic]}/#{estimate[:pessimistic]}" %></span>
         </div>
       <% end %>
