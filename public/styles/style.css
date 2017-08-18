@@ -1,0 +1,23 @@
+body, input[type=submit] {
+  font-family: monospace;
+}
+
+div[data-error] {
+  background-color: red;
+}
+
+div[data-in-progress], div[data-completed] {
+  margin-bottom: 3em;
+}
+
+[data-estimation-name] {
+  font-weight: bold;
+}
+
+[data-estimation-name]:before {
+  content: open-quote;
+}
+
+[data-estimation-name]:after {
+  content: close-quote;
+}
