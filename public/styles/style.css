@@ -1,5 +1,58 @@
-body, input[type=submit] {
-  font-family: monospace;
+html {
+  height: 100%;
+  background-color: white;
+}
+
+body  {
+  font-family: 'Lato', sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+}
+
+input[type=text], input[type=number] {
+  margin-left: 5px;
+  margin-right: 2px;
+  padding: 3px;
+  font-size: 16px;
+}
+
+
+input[type=submit] {
+  border: none;
+  font-family: inherit;
+  font-size: 14px;
+  color: inherit;
+  background: none;
+  cursor: pointer;
+  padding: 10px 20px;
+  display: inline-block;
+  letter-spacing: 1px;
+  font-weight: 400;
+  outline: none;
+  position: relative;
+  background: #cb4e4e;
+  color: #fff;
+  box-shadow: 0 6px #ab3c3c;
+  -webkit-transition: none;
+  -moz-transition: none;
+  transition: none;
+  border-radius: 0 0 5px 5px;
+}
+
+input[type=submit]:hover {
+  box-shadow: 0 4px #ab3c3c;
+  top: 2px;
+}
+
+.container {
+  background-color: #71A4D0;
+  width: 80%;
+  min-width: 950px;
+  max-width: 1500px;
+  height: auto;
+  margin: 40px auto 0;
+  padding: 30px 40px;
+  border-radius: 20px;
 }
 
 div[data-error] {
@@ -11,7 +64,7 @@ div[data-in-progress], div[data-completed] {
 }
 
 [data-estimation-name] {
-  font-weight: bold;
+  font-weight: 700;
 }
 
 [data-estimation-name]:before {
@@ -20,4 +73,17 @@ div[data-in-progress], div[data-completed] {
 
 [data-estimation-name]:after {
   content: close-quote;
+}
+
+.story-name-input {
+  display: flex;
+  align-items: baseline;
+}
+
+.story-name-input_button {
+  margin-left: 10px;
+}
+
+.story-title {
+  width: 400px;
 }
