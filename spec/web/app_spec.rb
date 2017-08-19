@@ -1,3 +1,4 @@
+require 'core/estimations'
 require 'web/app'
 require 'rack/test'
 require 'nokogiri'
@@ -6,7 +7,6 @@ RSpec.describe Web::App do
   include  Rack::Test::Methods
   let(:estimations) { spy(Core::Estimations) }
   let(:app) { described_class.new(estimations) }
-
   let(:html) { Nokogiri::HTML(last_response.body) }
 
   def given(method, return_value)
