@@ -24,12 +24,12 @@
       <h1>Stories currently being estimated</h1>
       <% estimations.in_progress.each do |estimation| %>
         <div data-in-progress>
-          <p>We are estimating the story <span data-estimation-name><%= estimation[:name] %></span> here.</p>
+          <p class="story-to-estimate">We are estimating the story <span data-estimation-name><%= estimation[:name] %></span> here.</p>
           <% if estimation[:estimates].empty? %>
             <p>No one estimated yet.</p>
           <% else %>
             <p>We have the estimates from <%= estimation[:estimates].map{|user| "<span data-user-name>#{user}</span>"}.join(", ") %>.</p>
-            <form action="complete" method="post">
+            <form class="complete-estimation" action="complete" method="post">
               <input type="hidden" name="name" value="<%= estimation[:name] %>">
               <input type="submit" value="I think we are done. That's everyone we wanted input from.">
             </form>
