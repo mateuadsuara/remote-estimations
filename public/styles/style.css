@@ -55,12 +55,13 @@ input[type=submit]:hover {
   border-radius: 20px;
 }
 
-div[data-error] {
-  background-color: red;
+.inner {
+  width: 98%;
+  margin: 0 auto;
 }
 
-div[data-in-progress], div[data-completed] {
-  margin-bottom: 3em;
+div[data-error] {
+  background-color: red;
 }
 
 [data-estimation-name] {
@@ -86,4 +87,25 @@ div[data-in-progress], div[data-completed] {
 
 .story-title {
   width: 400px;
+}
+
+.completed-estimations {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.completed-story {
+  background-color: #F8F8E6;
+  border-radius: 5px;
+  padding: 5px 15px;
+  width: 46%;
+  box-shadow:  5px 6px 1px #ccccc7;
+  margin-right: 15px;
+  margin-bottom: 15px;
+}
+
+@media only screen and (max-width: 1422px) {
+  .completed-story {
+    width: 43%;
+  }
 }
