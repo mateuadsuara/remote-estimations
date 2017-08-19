@@ -15,36 +15,42 @@
 
       <form action="add" method="post">
         <div class="story-name-input">
-          <p>I would like to get an estimate for the story: <input class="story-title" type="text" name="name" value="" required></p>
+          <h3>I would like to get an estimate for the story: <input class="story-title" type="text" name="name" value="" required></h3>
           <input type="hidden" name="description" value="">
           <input class="story-name-input_button" type="submit" value="Please estimate it.">
         </div>
       </form>
 
       <h1>Stories currently being estimated</h1>
-      <% estimations.in_progress.each do |estimation| %>
-        <div data-in-progress>
-          <p class="story-to-estimate">We are estimating the story <span data-estimation-name><%= estimation[:name] %></span> here.</p>
-          <% if estimation[:estimates].empty? %>
-            <p>No one estimated yet.</p>
-          <% else %>
-            <p>We have the estimates from <%= estimation[:estimates].map{|user| "<span data-user-name>#{user}</span>"}.join(", ") %>.</p>
-            <form class="complete-estimation" action="complete" method="post">
-              <input type="hidden" name="name" value="<%= estimation[:name] %>">
-              <input type="submit" value="I think we are done. That's everyone we wanted input from.">
-            </form>
+      <div class="estimations-in-progress">
+        <% estimations.in_progress.each do |estimation| %>
+          <div class="estimation-in-progress" data-in-progress>
+            <h3 class="story-to-estimate">We are estimating the story <span data-estimation-name><%= estimation[:name] %></span>.</h3>
+            <div class="all-estimates-per-story">
+              <% if estimation[:estimates].empty? %>
+                <p>No one estimated yet.</p>
+              <% else %>
+                <p>We have the estimates from <%= estimation[:estimates].map{|user| "<span data-user-name>#{user}</span>"}.join(", ") %>.</p>
+                <form class="complete-estimation" action="complete" method="post">
+                  <input type="hidden" name="name" value="<%= estimation[:name] %>">
+                  <input type="submit" value="I think we are done. That's everyone we wanted input from.">
+                </form>
+              <% end %>
+            </div>
+            <div class="my-estimate">
+              <h3>Here's my estimation:</h3>
+              <form action="estimate" method="post">
+                <input type="hidden" name="name" value="<%= estimation[:name] %>">
+                <p>I am <input type="text" name="user" value="" required>.</p>
+                <p>If I think optimistically, <span data-estimation-name><%= estimation[:name] %></span> could take <input type="number" name="optimistic" value="" required> points to achieve.</p>
+                <p>Thinking realistically, I guess it would take <input type="number" name="realistic" value="" required> points.</p>
+                <p>And being pessimistic, it might take <input type="number" name="pessimistic" value="" required> points.</p>
+                <input type="submit" value="I think that's about right. Please take my point of view into consideration.">
+              </form>
+            </div>
+          </div>
           <% end %>
-          <form action="estimate" method="post">
-            <input type="hidden" name="name" value="<%= estimation[:name] %>">
-            <p>I am <input type="text" name="user" value="" required>.</p>
-            <p>If I think optimistically, <span data-estimation-name><%= estimation[:name] %></span> could take <input type="number" name="optimistic" value="" required> points to achieve.</p>
-            <p>Thinking realistically, I guess it would take <input type="number" name="realistic" value="" required> points.</p>
-            <p>And being pessimistic, it might take <input type="number" name="pessimistic" value="" required> points.</p>
-            <input type="submit" value="I think that's about right. Please, take my point of view into consideration.">
-          </form>
-        </div>
-      <% end %>
-
+      </div>
       <h1>Completed estimations</h1>
       <div class="completed-estimations">
         <% estimations.completed.each do |estimation| %>
