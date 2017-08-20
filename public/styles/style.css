@@ -64,8 +64,40 @@ input[type=submit]:hover {
   margin: 0 auto;
 }
 
+.error-container:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.bubble {
+  width: 250px;
+  height: 64px;
+  background: #FF9494;
+  position: relative;
+  -moz-border-radius:    10px;
+  -webkit-border-radius: 10px;
+  border-radius:         10px;
+  float: right;
+}
+
+.bubble:before {
+  content:"";
+  position: absolute;
+  right: 100%;
+  top: 23px;
+  width: 0;
+  height: 0;
+  border-top: 13px solid transparent;
+  border-right: 26px solid #FF9494;
+  border-bottom: 13px solid transparent;
+}
+
 div[data-error] {
-  background-color: red;
+  padding-top: 22px;
+  padding-left: 10px;
+  font-weight: 700;
+  color: white;
 }
 
 [data-estimation-name] {
