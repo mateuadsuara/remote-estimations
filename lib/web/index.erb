@@ -1,77 +1,77 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    div[data-error] {
-      background-color: red;
-    }
-    body, input[type=submit] {
-      font-family: monospace;
-    }
-    div[data-in-progress], div[data-completed] {
-      margin-bottom: 3em;
-    }
-    [data-estimation-name] {
-      font-weight: bold;
-    }
-    [data-estimation-name]:before {
-      content: open-quote;
-    }
-    [data-estimation-name]:after {
-      content: close-quote;
-    }
-  </style>
-  <title>Estimate!</title>
-</head>
-<body>
-  <% if maybe_error %>
-    <div data-error><%= maybe_error %></div>
-  <% end %>
-
-  <form action="add" method="post">
-    I would like to get an estimate for the story: <input type="text" name="name" value="" required>.
-    <input type="hidden" name="description" value=""></br>
-    <input type="submit" value="Please, estimate it.">
-  </form>
-
-  <h1>Stories currently being estimated:</h1>
-  <% estimations.in_progress.each do |estimation| %>
-    <div data-in-progress>
-      We are estimating the story <span data-estimation-name><%= estimation[:name] %></span> here.
-      </br>
-      <% if estimation[:estimates].empty? %>
-        No one estimated yet.
-        </br>
-      <% else %>
-        We have the estimates from <%= estimation[:estimates].map{|user| "<span data-user-name>#{user}</span>"}.join(", ") %>.
-        <form action="complete" method="post">
-          <input type="hidden" name="name" value="<%= estimation[:name] %>">
-          <input type="submit" value="I think we are done. That's everyone we wanted input from.">
-        </form>
-      <% end %>
-      </br>
-      <form action="estimate" method="post">
-        <input type="hidden" name="name" value="<%= estimation[:name] %>">
-        I am <input type="text" name="user" value="" required>.</br>
-        If I think optimistically, <span data-estimation-name><%= estimation[:name] %></span> could take <input type="number" name="optimistic" value="" required> points to achieve. </br>
-        Thinking realistically, I guess it would take <input type="number" name="realistic" value="" required> points. </br>
-        And being pessimistic, it might take <input type="number" name="pessimistic" value="" required> points.</br>
-        <input type="submit" value="I think that's about right. Please, take my point of view into consideration.">
-      </form>
-    </div>
-  <% end %>
-
-  <h1>Completed estimations:</h1>
-  <% estimations.completed.each do |estimation| %>
-    <div data-completed>
-      The story <span data-estimation-name><%= estimation[:name] %></span> has been estimated to take <span data-final-estimate><%= estimation[:estimate] || "-" %></span> points.
-      <% estimation[:estimates].each do |user, estimate| %>
-        <div data-user-estimate>
-          <span data-user-name><%= user %></span> estimated it as
-          <span data-user-estimates><%= "#{estimate[:optimistic]}/#{estimate[:realistic]}/#{estimate[:pessimistic]}" %></span>
+  <head>
+    <link rel="stylesheet" type="text/css" href="/styles/style.css">
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700" rel="stylesheet">
+    <style>
+    </style>
+    <title>Estimate!</title>
+  </head>
+  <body>
+    <div class="container">
+      <% if maybe_error %>
+        <div class="error-container">
+          <div class="bubble">
+            <div data-error>Error: <%= maybe_error %></div>
+          </div>
         </div>
       <% end %>
+
+
+      <form action="add" method="post">
+        <div class="story-name-input">
+          <h3>I would like to get an estimate for the story: <input class="story-title" type="text" name="name" value="" required></h3>
+          <input type="hidden" name="description" value="">
+          <input class="story-name-input_button" type="submit" value="Please estimate it.">
+        </div>
+      </form>
+
+      <h1>Stories currently being estimated</h1>
+      <div class="estimations-in-progress">
+        <% estimations.in_progress.each do |estimation| %>
+          <div class="estimation-in-progress" data-in-progress>
+            <h3 class="story-to-estimate">We are estimating the story <span data-estimation-name><%= estimation[:name] %></span>.</h3>
+            <div class="all-estimates-per-story">
+              <% if estimation[:estimates].empty? %>
+                <p>No one estimated yet.</p>
+              <% else %>
+                <p>We have the estimates from <%= estimation[:estimates].map{|user| "<span data-user-name>#{user}</span>"}.join(", ") %>.</p>
+                <form class="complete-estimation" action="complete" method="post">
+                  <input type="hidden" name="name" value="<%= estimation[:name] %>">
+                  <input type="submit" value="I think we are done. That's everyone we wanted input from.">
+                </form>
+              <% end %>
+            </div>
+            <div class="my-estimate">
+              <h3>Here's my estimation:</h3>
+              <form action="estimate" method="post">
+                <input type="hidden" name="name" value="<%= estimation[:name] %>">
+                <p>I am <input type="text" name="user" value="" required>.</p>
+                <p>If I think optimistically, <span data-estimation-name><%= estimation[:name] %></span> could take <input type="number" name="optimistic" value="" required> points to achieve.</p>
+                <p>Thinking realistically, I guess it would take <input type="number" name="realistic" value="" required> points.</p>
+                <p>And being pessimistic, it might take <input type="number" name="pessimistic" value="" required> points.</p>
+                <input type="submit" value="I think that's about right. Please take my point of view into consideration.">
+              </form>
+            </div>
+          </div>
+          <% end %>
+      </div>
+      <h1>Completed estimations</h1>
+      <div class="completed-estimations">
+        <% estimations.completed.each do |estimation| %>
+          <div class="completed-story" data-completed>
+            <p><span data-estimation-name><%= estimation[:name] %></span> has been estimated at <span data-final-estimate><%= estimation[:estimate] || "-" %></span> points.</p>
+            <ul>
+              <% estimation[:estimates].each do |user, estimate| %>
+                <li data-user-estimate>
+                  <span data-user-name><%= user %></span> estimated it as
+                  <span data-user-estimates><%= "#{estimate[:optimistic]}/#{estimate[:realistic]}/#{estimate[:pessimistic]}" %></span>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+      </div>
     </div>
-  <% end %>
-</body>
+  </body>
 </html>

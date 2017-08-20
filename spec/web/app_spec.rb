@@ -1,3 +1,4 @@
+require 'core/estimations'
 require 'web/app'
 require 'rack/test'
 require 'nokogiri'
@@ -6,7 +7,6 @@ RSpec.describe Web::App do
   include  Rack::Test::Methods
   let(:estimations) { spy(Core::Estimations) }
   let(:app) { described_class.new(estimations) }
-
   let(:html) { Nokogiri::HTML(last_response.body) }
 
   def given(method, return_value)
@@ -29,10 +29,10 @@ RSpec.describe Web::App do
 
     in_progress = html.css('[data-in-progress]')
 
-    expect(in_progress[0].css('[data-estimation-name]').map(&:text)).to eq ["name1"]
+    expect(in_progress[0].css('.story-to-estimate [data-estimation-name]').map(&:text)).to eq ["name1"]
     expect(in_progress[0].css('[data-user-name]').map(&:text)).to eq ["user1", "user2"]
 
-    expect(in_progress[1].css('[data-estimation-name]').map(&:text)).to eq ["name2"]
+    expect(in_progress[1].css('.story-to-estimate [data-estimation-name]').map(&:text)).to eq ["name2"]
     expect(in_progress[1].css('[data-user-name]').map(&:text)).to eq ["user1"]
   end
 
@@ -158,12 +158,12 @@ RSpec.describe Web::App do
 
   it 'has a way to complete an estimation' do
     given(:in_progress, [
-      {name: "name1", estimates: []}
+      {name: "name1", estimates: ["user1"]}
     ])
 
     get "/"
 
-    form = html.css('form[action="complete"][method="post"]').first
+    form = html.css('.complete-estimation').first
     expect(form).not_to eq nil
     expect(form.css('input[type="submit"]').length).to eq 1
     expect(form.css('input[name="name"]').length).to eq 1

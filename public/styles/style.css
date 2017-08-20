@@ -1,0 +1,162 @@
+html {
+  height: 100%;
+  background-color: white;
+}
+
+body  {
+  font-family: 'Lato', sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+}
+
+input[type=text], input[type=number] {
+  margin-left: 5px;
+  margin-right: 2px;
+  padding: 3px;
+  font-size: 16px;
+}
+
+input[type=number] {
+  width: 45px;
+}
+
+input[type=submit] {
+  border: none;
+  font-family: inherit;
+  font-size: 14px;
+  color: inherit;
+  background: none;
+  cursor: pointer;
+  padding: 10px 20px;
+  display: inline-block;
+  letter-spacing: 1px;
+  font-weight: 400;
+  outline: none;
+  position: relative;
+  background: #cb4e4e;
+  color: #fff;
+  box-shadow: 0 6px #ab3c3c;
+  -webkit-transition: none;
+  -moz-transition: none;
+  transition: none;
+  border-radius: 0 0 5px 5px;
+  margin-top: 10px;
+}
+
+input[type=submit]:hover {
+  box-shadow: 0 4px #ab3c3c;
+  top: 2px;
+}
+
+.container {
+  background-color: #71A4D0;
+  width: 80%;
+  min-width: 950px;
+  max-width: 1500px;
+  height: auto;
+  margin: 40px auto 0;
+  padding: 30px 40px;
+  border-radius: 20px;
+}
+
+.inner {
+  width: 98%;
+  margin: 0 auto;
+}
+
+.error-container:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.bubble {
+  width: 250px;
+  height: 64px;
+  background: #FF9494;
+  position: relative;
+  -moz-border-radius:    10px;
+  -webkit-border-radius: 10px;
+  border-radius:         10px;
+  float: right;
+}
+
+.bubble:before {
+  content:"";
+  position: absolute;
+  right: 100%;
+  top: 23px;
+  width: 0;
+  height: 0;
+  border-top: 13px solid transparent;
+  border-right: 26px solid #FF9494;
+  border-bottom: 13px solid transparent;
+}
+
+div[data-error] {
+  padding-top: 22px;
+  padding-left: 10px;
+  font-weight: 700;
+  color: white;
+}
+
+[data-estimation-name] {
+  font-weight: 700;
+}
+
+[data-estimation-name]:before {
+  content: open-quote;
+}
+
+[data-estimation-name]:after {
+  content: close-quote;
+}
+
+.story-name-input {
+  display: flex;
+  align-items: baseline;
+}
+
+.story-name-input_button {
+  margin-left: 10px;
+}
+
+.story-title {
+  width: 400px;
+  height: 30px;
+}
+
+.estimations-in-progress, .completed-estimations {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.completed-story, .estimation-in-progress {
+  background-color: #F8F8E6;
+  border-radius: 5px;
+  padding: 5px 15px;
+  width: 46%;
+  box-shadow:  5px 6px 1px #ccccc7;
+  margin-right: 15px;
+  margin-bottom: 15px;
+}
+
+.estimation-in-progress {
+  background-color: #fcfcf7;
+  min-width: 555px;
+}
+
+.all-estimates-per-story {
+  margin-bottom: 20px;
+}
+
+.my-estimate {
+  margin-bottom: 20px;
+  border-top: 2px dashed #cb4e4e;
+}
+
+@media only screen and (max-width: 1422px) {
+  .completed-story {
+    width: 43%;
+  }
+}
