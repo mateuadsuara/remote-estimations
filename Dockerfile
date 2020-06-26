@@ -1,4 +1,4 @@
-FROM ruby:2.3.1
+FROM ruby:2.7.1
 
 WORKDIR /opt/remote-estimations
 
