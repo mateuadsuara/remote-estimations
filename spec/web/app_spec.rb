@@ -172,7 +172,7 @@ RSpec.describe Web::App do
   it 'displays the errors' do
     get "/?error=the_error"
 
-    expect(html.css('[data-error]').map(&:text)).to eq ["the_error"]
+    expect(html.css('[data-error]').map(&:text)).to eq ["Error: the_error"]
   end
 
   it 'does not display error' do
