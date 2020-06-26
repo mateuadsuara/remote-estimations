@@ -2,9 +2,13 @@
 
 A web application to allow remote teams to estimate stories
 
-## Run
+## Run locally
 
 `rackup` or `rackup -p 2222`
+
+## Run with docker-compose
+
+`docker-compose up --build`
 
 ## Demo
 
