@@ -8,7 +8,11 @@ A web application to allow remote teams to estimate stories
 
 ## Run with docker-compose
 
-`docker-compose up --build`
+`./start`
+
+## Run tests with docker-compose
+
+`./test`
 
 ## Demo
 
