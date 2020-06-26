@@ -24,6 +24,10 @@ module Web
       ERB.new(File.new(File.expand_path(File.dirname(__FILE__) + "/#{template}.erb")).read).result(binding)
     end
 
+    def escape_quotes(string)
+      string.gsub('"', "&quot;")
+    end
+
     def post_action(environment)
       environment["PATH_INFO"].scan(/\/([a-z]*)/).first.first.to_sym
     end

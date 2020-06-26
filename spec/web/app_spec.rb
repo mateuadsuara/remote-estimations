@@ -91,6 +91,30 @@ RSpec.describe Web::App do
     )
   end
 
+  ['"', "'"].each do |conflicting_string|
+    it "escapes the conflicting name #{conflicting_string} in the estimate form" do
+      given(:in_progress, [
+        {name: conflicting_string, estimates: []}
+      ])
+
+      get "/"
+
+      attributes = html.css("form[action=estimate] input[name=name]").first.attributes
+      expect(attributes["value"].value).to eq conflicting_string
+    end
+
+    it "escapes the conflicting name #{conflicting_string} in the complete form" do
+      given(:in_progress, [
+        {name: conflicting_string, estimates: ["user1"]}
+      ])
+
+      get "/"
+
+      attributes = html.css("form[action=complete] input[name=name]").first.attributes
+      expect(attributes["value"].value).to eq conflicting_string
+    end
+  end
+
   it 'submits an estimate' do
     post "/estimate", {
       "name"=>"::the name::",

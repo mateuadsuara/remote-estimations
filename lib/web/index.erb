@@ -37,7 +37,7 @@
               <% else %>
                 <p>We have the estimates from <%= estimation[:estimates].map{|user| "<span data-user-name>#{user}</span>"}.join(", ") %>.</p>
                 <form class="complete-estimation" action="complete" method="post">
-                  <input type="hidden" name="name" value="<%= estimation[:name] %>">
+                  <input type="hidden" name="name" value="<%= escape_quotes(estimation[:name]) %>">
                   <input type="submit" value="I think we are done. That's everyone we wanted input from.">
                 </form>
               <% end %>
@@ -45,7 +45,7 @@
             <div class="my-estimate">
               <h3>Here's my estimation:</h3>
               <form action="estimate" method="post">
-                <input type="hidden" name="name" value="<%= estimation[:name] %>">
+                <input type="hidden" name="name" value="<%= escape_quotes(estimation[:name]) %>">
                 <p>I am <input type="text" name="user" value="" required>.</p>
                 <p>If I think optimistically, <span data-estimation-name><%= estimation[:name] %></span> could take <input type="number" name="optimistic" value="" required> points to achieve.</p>
                 <p>Thinking realistically, I guess it would take <input type="number" name="realistic" value="" required> points.</p>
