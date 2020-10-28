@@ -22,7 +22,7 @@ RSpec.describe Core::Estimations do
     }]
   end
 
-  it 'cannot be added twice' do
+  it 'cannot be added twice (in the same default room)' do
     first_addition = estimations.add(
       name: "::the name::",
       description: "::the description 1::"
@@ -37,6 +37,33 @@ RSpec.describe Core::Estimations do
     expect(estimations.in_progress).to eq [{
       name: "::the name::",
       description: "::the description 1::",
+      estimates: []
+    }]
+  end
+
+  it 'can be added twice when they are in different rooms' do
+    first_addition = estimations.add(
+      room: "::room 1::",
+      name: "::the name::",
+      description: "::the description 1::"
+    )
+    second_addition = estimations.add(
+      room: "::room 2::",
+      name: "::the name::",
+      description: "::the description 2::"
+    )
+
+    expect(first_addition).to eq Result.success
+    expect(estimations.in_progress(room: "::room 1::")).to eq [{
+      name: "::the name::",
+      description: "::the description 1::",
+      estimates: []
+    }]
+
+    expect(second_addition).to eq Result.success
+    expect(estimations.in_progress(room: "::room 2::")).to eq [{
+      name: "::the name::",
+      description: "::the description 2::",
       estimates: []
     }]
   end
@@ -135,16 +162,19 @@ RSpec.describe Core::Estimations do
     expect(estimations.completed.length).to eq 1
   end
 
-  it 'can take estimates for the matching name' do
+  it 'can take estimates for the matching name in the same room' do
     estimations.add(
+      room: "::room::",
       name: "::matching::",
       description: ""
     )
     estimations.add(
+      room: "::room::",
       name: "::another estimation::",
       description: ""
     )
     first_estimation = estimations.estimate(
+      room: "::room::",
       name: "::matching::",
       user: "::user1::",
       optimistic: 1,
@@ -152,6 +182,7 @@ RSpec.describe Core::Estimations do
       pessimistic: 4
     )
     second_estimation = estimations.estimate(
+      room: "::room::",
       name: "::matching::",
       user: "::user2::",
       optimistic: 9,
@@ -161,7 +192,7 @@ RSpec.describe Core::Estimations do
 
     expect(first_estimation).to eq Result.success
     expect(second_estimation).to eq Result.success
-    expect(estimations.in_progress).to eq([
+    expect(estimations.in_progress(room: "::room::")).to eq([
       {name: "::matching::", description: "", estimates: ["::user1::", "::user2::"]},
       {name: "::another estimation::", description: "", estimates: []}
     ])
@@ -192,12 +223,14 @@ RSpec.describe Core::Estimations do
     })
   end
 
-  it 'cannot be estimated by the same user twice' do
+  it 'cannot be estimated twice by the same user in the same room' do
     estimations.add(
+      room: "::room::",
       name: "::the name::",
       description: "::the description::"
     )
     first_estimation = estimations.estimate(
+      room: "::room::",
       name: "::the name::",
       user: "::the user::",
       optimistic: 1,
@@ -205,6 +238,7 @@ RSpec.describe Core::Estimations do
       pessimistic: 4
     )
     second_estimation = estimations.estimate(
+      room: "::room::",
       name: "::the name::",
       user: "::the user::",
       optimistic: 9,
@@ -212,16 +246,71 @@ RSpec.describe Core::Estimations do
       pessimistic: 9
     )
     estimations.complete(
+      room: "::room::",
       name: "::the name::"
     )
 
     expect(first_estimation).to eq Result.success
     expect(second_estimation).to eq Result.failure(:user_estimated_previously)
-    expect(estimations.completed.first[:estimates]).to eq({
+    expect(estimations.completed(room: "::room::").first[:estimates]).to eq({
       "::the user::" => {
         optimistic: 1,
         realistic: 2,
         pessimistic: 4
+      }
+    })
+  end
+
+  it 'the same user can estimate the same name if they are in different rooms' do
+    estimations.add(
+      room: "::room 1::",
+      name: "::the name::",
+      description: "::the description::"
+    )
+    estimations.add(
+      room: "::room 2::",
+      name: "::the name::",
+      description: "::the description::"
+    )
+    first_estimation = estimations.estimate(
+      room: "::room 1::",
+      name: "::the name::",
+      user: "::the user::",
+      optimistic: 1,
+      realistic: 2,
+      pessimistic: 4
+    )
+    second_estimation = estimations.estimate(
+      room: "::room 2::",
+      name: "::the name::",
+      user: "::the user::",
+      optimistic: 9,
+      realistic: 9,
+      pessimistic: 9
+    )
+    estimations.complete(
+      room: "::room 1::",
+      name: "::the name::"
+    )
+    estimations.complete(
+      room: "::room 2::",
+      name: "::the name::"
+    )
+
+    expect(first_estimation).to eq Result.success
+    expect(second_estimation).to eq Result.success
+    expect(estimations.completed(room: "::room 1::").first[:estimates]).to eq({
+      "::the user::" => {
+        optimistic: 1,
+        realistic: 2,
+        pessimistic: 4
+      }
+    })
+    expect(estimations.completed(room: "::room 2::").first[:estimates]).to eq({
+      "::the user::" => {
+        optimistic: 9,
+        realistic: 9,
+        pessimistic: 9
       }
     })
   end
@@ -277,7 +366,7 @@ RSpec.describe Core::Estimations do
     expect(estimations.in_progress.first[:estimates]).to eq([])
   end
 
-  it 'cannot be completed twice' do
+  it 'cannot be completed twice (in the same default room)' do
     estimations.add(
       name: "::the name::",
       description: "::the description::"
@@ -302,7 +391,7 @@ RSpec.describe Core::Estimations do
     expect(estimations.completed.length).to eq 1
   end
 
-  it 'that are in progress show which users already estimated' do
+  it 'that are in progress show which users already estimated in the room' do
     estimations.add(
       name: "::estimation1::",
       description: "::description1::"
@@ -339,10 +428,26 @@ RSpec.describe Core::Estimations do
       name: "::estimation3::",
       description: "::description3::"
     )
+    estimations.add(
+      room: "::another room::",
+      name: "::estimation1::",
+      description: "::description1::"
+    )
+    estimations.estimate(
+      room: "::another room::",
+      name: "::estimation1::",
+      user: "::user1::",
+      optimistic: 3,
+      realistic: 6,
+      pessimistic: 9
+    )
 
     expect(estimations.in_progress).to eq [
       {name: "::estimation1::", description: "::description1::", estimates: ["::user1::", "::user2::"]},
       {name: "::estimation3::", description: "::description3::", estimates: []}
+    ]
+    expect(estimations.in_progress(room: "::another room::")).to eq [
+      {name: "::estimation1::", description: "::description1::", estimates: ["::user1::"]},
     ]
   end
 

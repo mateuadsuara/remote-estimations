@@ -3,15 +3,16 @@ require 'result'
 module Core
   class Estimations
     def initialize
-      @estimations = []
+      @estimation_rooms = {}
     end
 
-    def add(name:, description:)
+    def add(room: nil, name:, description:)
       return Result.failure(:empty_name) if name.strip.empty?
-      estimation = @estimations.find{|e|e[:name] == name}
+      estimations = estimations_in(room)
+      estimation = estimations.find{|e|e[:name] == name}
       return Result.failure(:added_previously) if estimation
 
-      @estimations << {
+      estimations << {
         name: name,
         description: description,
         completed: false,
@@ -20,13 +21,14 @@ module Core
       Result.success
     end
 
-    def complete(name:)
-      estimation = @estimations.find{|e|e[:name] == name}
+    def complete(room: nil, name:)
+      estimations = estimations_in(room)
+      estimation = estimations.find{|e|e[:name] == name}
       return Result.failure(:nonexistent_name) if !estimation
       return Result.failure(:completed_previously) if estimation[:completed]
       return Result.failure(:unestimated) if estimation[:estimates].empty?
 
-      @estimations.map! do |estimation|
+      estimations.map! do |estimation|
         if estimation[:name] == name
           estimation.merge(completed: true)
         else
@@ -36,15 +38,16 @@ module Core
       Result.success
     end
 
-    def estimate(name:, user:, optimistic:, realistic:, pessimistic:)
+    def estimate(room: nil, name:, user:, optimistic:, realistic:, pessimistic:)
       return Result.failure(:empty_user) if user.strip.empty?
-      estimation = @estimations.find{|e|e[:name] == name}
+      estimations = estimations_in(room)
+      estimation = estimations.find{|e|e[:name] == name}
       return Result.failure(:nonexistent_name) if !estimation
       return Result.failure(:completed_previously) if estimation[:completed]
       return Result.failure(:user_estimated_previously) if estimation[:estimates][user]
       return Result.failure(:absurd_estimation) if realistic < optimistic || pessimistic < realistic || optimistic < 0
 
-      @estimations.map! do |estimation|
+      estimations.map! do |estimation|
         if estimation[:name] == name
           estimation.merge(
             estimates: estimation[:estimates].merge(
@@ -62,8 +65,9 @@ module Core
       Result.success
     end
 
-    def in_progress
-      @estimations.select do |estimation|
+    def in_progress(room: nil)
+      estimations = estimations_in(room)
+      estimations.select do |estimation|
         !estimation[:completed]
       end.map do |estimation|
         h = estimation.clone
@@ -73,8 +77,9 @@ module Core
       end
     end
 
-    def completed
-      @estimations.select do |estimation|
+    def completed(room: nil)
+      estimations = estimations_in(room)
+      estimations.select do |estimation|
         estimation[:completed]
       end.map do |estimation|
         h = estimation.clone
@@ -85,6 +90,11 @@ module Core
     end
 
     private
+    def estimations_in(room)
+      @estimation_rooms[room] ||= []
+      @estimation_rooms[room]
+    end
+
     def pert(estimation)
       estimates = estimation[:estimates]&.values
       return nil if estimates.empty?
