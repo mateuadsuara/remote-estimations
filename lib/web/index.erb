@@ -8,6 +8,15 @@
     <title>Estimate!</title>
   </head>
   <body>
+    <% unless maybe_room_name %>
+      <div class="container">
+        <h3>You're on the default room! Other people might be seeing this room as well. Maybe you want a separate room?</h3>
+        <form action="/take_to_room" method="get">
+          <p>I would like to go to the room named: <input type="text" name="room_name" required> <input type="submit" value="Take me there!"></p>
+        </form>
+      </div>
+    <% end %>
+
     <div class="container">
       <% if maybe_error %>
         <div class="error-container">

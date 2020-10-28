@@ -26,6 +26,22 @@ RSpec.describe Web::App do
     expect(last_response.header['Location']).to eq('/room_name/')
   end
 
+  it 'on index (in the default room) shows a form to go to a separate room' do
+    get "/"
+
+    form = html.css('form[action="/take_to_room"][method="get"]').first
+    expect(form).not_to eq nil
+    expect(form.css('input[type="submit"]').length).to eq 1
+    room_name = form.css('input[name="room_name"]')
+    expect(room_name.length).to eq 1
+    expect(room_name.first.attributes).to include "required"
+
+    get "/take_to_room?room_name=specific/room"
+
+    expect(last_response.status).to eq(302)
+    expect(last_response.header['Location']).to eq('/specific/room/')
+  end
+
   it 'on index shows in progress estimations (in the default room)' do
     allow(estimations).to receive(:in_progress)
       .and_return([
@@ -49,7 +65,7 @@ RSpec.describe Web::App do
     expect(in_progress[1].css('[data-user-name]').map(&:text)).to eq ["user1"]
   end
 
-  it 'on index shows in progress estimations in a specific room' do
+  it 'shows in progress estimations in a specific room' do
     allow(estimations).to receive(:in_progress)
       .and_return([
         {name: "name1", estimates: ["user1"]},

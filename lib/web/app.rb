@@ -16,8 +16,12 @@ module Web
 
       if environment["REQUEST_METHOD"] == "GET" &&
         url = environment["PATH_INFO"]
+        if url == "/take_to_room"
+          room_name = get_params(environment)["room_name"].first
+          return redirect_to("/#{room_name}/")
+        end
         unless url.end_with?('/')
-          return ['302', {'Location' => "#{url}/"}, []]
+          return redirect_to("#{url}/")
         end
       end
 
@@ -72,8 +76,11 @@ module Web
     end
 
     def parse_error(environment)
-      get_params = CGI::parse(environment["QUERY_STRING"])
-      get_params["error"]&.first
+      get_params(environment)["error"]&.first
+    end
+
+    def get_params(environment)
+      CGI::parse(environment["QUERY_STRING"])
     end
 
     def redirect_action(environment, result)
@@ -82,6 +89,10 @@ module Web
       location ||= result.succeeded { room_url }
       location ||= result.failed { |reason| "#{room_url}?error=#{reason}" }
 
+      return redirect_to(location)
+    end
+
+    def redirect_to(location)
       return ['302', {'Location' => location}, []]
     end
   end
