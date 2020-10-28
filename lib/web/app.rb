@@ -7,32 +7,31 @@ module Web
     end
 
     def call(environment)
-      if environment["REQUEST_METHOD"] == "POST"
+      method = environment["REQUEST_METHOD"]
+      url = environment["PATH_INFO"]
+
+      if method == "POST"
         action = post_action(environment)
         params = post_params(environment)
         result = @estimations.send(action, **params)
-        return redirect_action(environment, result)
+        return redirect_result(environment, result)
       end
 
-      if environment["REQUEST_METHOD"] == "GET" &&
-        url = environment["PATH_INFO"]
-        if url == "/take_to_room"
-          room_name = CGI::escape(get_params(environment)["room_name"].first || "")
-          return redirect_to(room_url(room_name))
-        end
-        unless url.end_with?('/')
-          return redirect_to("#{url}/")
-        end
+      if url == "/take_to_room"
+        return redirect_to_room(environment)
       end
 
-      maybe_error = parse_error(environment)
-      maybe_room_name = room_name(environment)
-      html = render('index', @estimations, maybe_error, maybe_room_name)
+      return redirect_to("#{url}/") unless url.end_with?('/')
+
+      html = render('index', environment)
       ['200', {'Content-Type' => 'text/html'}, [html]]
     end
 
     private
-    def render(template, estimations, maybe_error, maybe_room_name)
+    def render(template, environment)
+      estimations = @estimations
+      maybe_error = parse_error(environment)
+      maybe_room_name = room_name(environment)
       ERB.new(File.new(File.expand_path(File.dirname(__FILE__) + "/#{template}.erb")).read).result(binding)
     end
 
@@ -82,12 +81,17 @@ module Web
       CGI::parse(environment["QUERY_STRING"])
     end
 
-    def redirect_action(environment, result)
+    def redirect_result(environment, result)
       room_url = room_url(room_name(environment))
 
       location = result.unwrap(room_url){ |failure_reason| "#{room_url}?error=#{failure_reason}" }
 
       return redirect_to(location)
+    end
+
+    def redirect_to_room(environment)
+      room_name = CGI::escape(get_params(environment)["room_name"].first || "")
+      return redirect_to(room_url(room_name))
     end
 
     def redirect_to(location)
