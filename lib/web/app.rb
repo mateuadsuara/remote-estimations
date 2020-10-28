@@ -17,8 +17,8 @@ module Web
       if environment["REQUEST_METHOD"] == "GET" &&
         url = environment["PATH_INFO"]
         if url == "/take_to_room"
-          room_name = CGI::escape(get_params(environment)["room_name"].first)
-          return redirect_to("/#{room_name}/")
+          room_name = CGI::escape(get_params(environment)["room_name"].first || "")
+          return redirect_to(room_url(room_name))
         end
         unless url.end_with?('/')
           return redirect_to("#{url}/")
@@ -62,12 +62,11 @@ module Web
       url_split(environment).first[1..-1]
     end
 
-    def room_url(environment)
-      room = room_name(environment)
-      if room
-        "/#{room}/"
-      else
+    def room_url(room_name)
+      if room_name.nil? || room_name.empty?
         '/'
+      else
+        "/#{room_name}/"
       end
     end
 
@@ -84,7 +83,7 @@ module Web
     end
 
     def redirect_action(environment, result)
-      room_url = room_url(environment)
+      room_url = room_url(room_name(environment))
 
       location ||= result.succeeded { room_url }
       location ||= result.failed { |reason| "#{room_url}?error=#{reason}" }

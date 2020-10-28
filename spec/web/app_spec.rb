@@ -35,11 +35,27 @@ RSpec.describe Web::App do
     room_name = form.css('input[name="room_name"]')
     expect(room_name.length).to eq 1
     expect(room_name.first.attributes).to include "required"
+  end
 
+  it 'take to a specific room redirects to the room' do
     get "/take_to_room?room_name= specific /room"
 
     expect(last_response.status).to eq(302)
     expect(last_response.header['Location']).to eq('/+specific+%2Froom/')
+  end
+
+  it 'take to empty room redirects to the default room' do
+    get "/take_to_room?room_name="
+
+    expect(last_response.status).to eq(302)
+    expect(last_response.header['Location']).to eq('/')
+  end
+
+  it 'take to nil room redirects to the default room' do
+    get "/take_to_room"
+
+    expect(last_response.status).to eq(302)
+    expect(last_response.header['Location']).to eq('/')
   end
 
   it 'on index shows in progress estimations (in the default room)' do
