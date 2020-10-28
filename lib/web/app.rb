@@ -11,7 +11,14 @@ module Web
         action = post_action(environment)
         params = post_params(environment)
         result = @estimations.send(action, **params)
-        return redirect(environment, result)
+        return redirect_action(environment, result)
+      end
+
+      if environment["REQUEST_METHOD"] == "GET" &&
+        url = environment["PATH_INFO"]
+        unless url.end_with?('/')
+          return ['302', {'Location' => "#{url}/"}, []]
+        end
       end
 
       maybe_error = parse_error(environment)
@@ -69,7 +76,7 @@ module Web
       get_params["error"]&.first
     end
 
-    def redirect(environment, result)
+    def redirect_action(environment, result)
       room_url = room_url(environment)
 
       location ||= result.succeeded { room_url }

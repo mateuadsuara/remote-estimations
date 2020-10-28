@@ -19,6 +19,13 @@ RSpec.describe Web::App do
     end
   end
 
+  it 'redirects to the correct room url when not ending with "/"' do
+    get "/room_name"
+
+    expect(last_response.status).to eq(302)
+    expect(last_response.header['Location']).to eq('/room_name/')
+  end
+
   it 'on index shows in progress estimations (in the default room)' do
     allow(estimations).to receive(:in_progress)
       .and_return([
