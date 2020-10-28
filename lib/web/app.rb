@@ -17,7 +17,7 @@ module Web
       if environment["REQUEST_METHOD"] == "GET" &&
         url = environment["PATH_INFO"]
         if url == "/take_to_room"
-          room_name = get_params(environment)["room_name"].first
+          room_name = CGI::escape(get_params(environment)["room_name"].first)
           return redirect_to("/#{room_name}/")
         end
         unless url.end_with?('/')

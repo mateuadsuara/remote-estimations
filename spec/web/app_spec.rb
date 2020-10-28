@@ -36,10 +36,10 @@ RSpec.describe Web::App do
     expect(room_name.length).to eq 1
     expect(room_name.first.attributes).to include "required"
 
-    get "/take_to_room?room_name=specific/room"
+    get "/take_to_room?room_name= specific /room"
 
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/specific/room/')
+    expect(last_response.header['Location']).to eq('/+specific+%2Froom/')
   end
 
   it 'on index shows in progress estimations (in the default room)' do
