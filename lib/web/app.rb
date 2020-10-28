@@ -85,8 +85,7 @@ module Web
     def redirect_action(environment, result)
       room_url = room_url(room_name(environment))
 
-      location ||= result.succeeded { room_url }
-      location ||= result.failed { |reason| "#{room_url}?error=#{reason}" }
+      location = result.unwrap(room_url){ |failure_reason| "#{room_url}?error=#{failure_reason}" }
 
       return redirect_to(location)
     end

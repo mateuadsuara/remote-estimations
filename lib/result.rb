@@ -9,11 +9,8 @@ module Result
 
   private
   class Success
-    def self.succeeded
-      yield if block_given?
-    end
-
-    def self.failed
+    def self.unwrap(sucess_value)
+      sucess_value
     end
   end
 
@@ -22,10 +19,7 @@ module Result
       @reason = reason
     end
 
-    def succeeded
-    end
-
-    def failed
+    def unwrap(sucess_value)
       yield @reason if block_given?
     end
 
