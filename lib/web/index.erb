@@ -8,6 +8,15 @@
     <title>Estimate!</title>
   </head>
   <body>
+    <% unless maybe_room_name %>
+      <div class="container">
+        <h3>You're on the default room! Other people might be seeing this room as well. Maybe you want a separate room?</h3>
+        <form action="/take_to_room" method="get">
+          <p>I would like to go to the room named: <input type="text" name="room_name" required> <input type="submit" value="Take me there!"></p>
+        </form>
+      </div>
+    <% end %>
+
     <div class="container">
       <% if maybe_error %>
         <div class="error-container">
@@ -28,7 +37,7 @@
 
       <h1>Stories currently being estimated</h1>
       <div class="estimations-in-progress">
-        <% estimations.in_progress.each do |estimation| %>
+        <% estimations.in_progress(room: maybe_room_name).each do |estimation| %>
           <div class="estimation-in-progress" data-in-progress>
             <h3 class="story-to-estimate">We are estimating the story <span data-estimation-name><%= estimation[:name] %></span>.</h3>
             <div class="all-estimates-per-story">
@@ -58,7 +67,7 @@
       </div>
       <h1>Completed estimations</h1>
       <div class="completed-estimations">
-        <% estimations.completed.each do |estimation| %>
+        <% estimations.completed(room: maybe_room_name).each do |estimation| %>
           <div class="completed-story" data-completed>
             <p><span data-estimation-name><%= estimation[:name] %></span> has been estimated at <span data-final-estimate><%= estimation[:estimate] || "-" %></span> points.</p>
             <ul>

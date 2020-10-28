@@ -19,13 +19,42 @@ RSpec.describe Web::App do
     end
   end
 
-  it 'on index shows in progress estimations' do
-    given(:in_progress, [
-      {name: "name1", estimates: ["user1", "user2"]},
-      {name: "name2", estimates: ["user1"]}
-    ])
+  it 'redirects to the correct room url when not ending with "/"' do
+    get "/room_name"
+
+    expect(last_response.status).to eq(302)
+    expect(last_response.header['Location']).to eq('/room_name/')
+  end
+
+  it 'on index (in the default room) shows a form to go to a separate room' do
+    get "/"
+
+    form = html.css('form[action="/take_to_room"][method="get"]').first
+    expect(form).not_to eq nil
+    expect(form.css('input[type="submit"]').length).to eq 1
+    room_name = form.css('input[name="room_name"]')
+    expect(room_name.length).to eq 1
+    expect(room_name.first.attributes).to include "required"
+
+    get "/take_to_room?room_name=specific/room"
+
+    expect(last_response.status).to eq(302)
+    expect(last_response.header['Location']).to eq('/specific/room/')
+  end
+
+  it 'on index shows in progress estimations (in the default room)' do
+    allow(estimations).to receive(:in_progress)
+      .and_return([
+        {name: "name1", estimates: ["user1", "user2"]},
+        {name: "name2", estimates: ["user1"]}
+      ])
 
     get "/"
+
+    expect(estimations).to have_received(:in_progress)
+      .with(hash_including(
+        room: nil
+      ))
 
     in_progress = html.css('[data-in-progress]')
 
@@ -36,32 +65,57 @@ RSpec.describe Web::App do
     expect(in_progress[1].css('[data-user-name]').map(&:text)).to eq ["user1"]
   end
 
-  it 'on index shows completed estimations' do
-    given(:completed, [
-      {
-        name: "name1",
-        estimate: 6.5,
-        estimates: {
-          "user1" => {
-            optimistic: 1,
-            realistic: 4,
-            pessimistic: 8
-          },
-          "user2" => {
-            optimistic: 4,
-            realistic: 4,
-            pessimistic: 4
+  it 'shows in progress estimations in a specific room' do
+    allow(estimations).to receive(:in_progress)
+      .and_return([
+        {name: "name1", estimates: ["user1"]},
+      ])
+
+    get "/specific/room/"
+
+    expect(estimations).to have_received(:in_progress)
+      .with(hash_including(
+        room: "specific/room"
+      ))
+
+    in_progress = html.css('[data-in-progress]')
+
+    expect(in_progress[0].css('.story-to-estimate [data-estimation-name]').map(&:text)).to eq ["name1"]
+    expect(in_progress[0].css('[data-user-name]').map(&:text)).to eq ["user1"]
+  end
+
+  it 'on index shows completed estimations (in the default room)' do
+    allow(estimations).to receive(:completed)
+      .and_return([
+        {
+          name: "name1",
+          estimate: 6.5,
+          estimates: {
+            "user1" => {
+              optimistic: 1,
+              realistic: 4,
+              pessimistic: 8
+            },
+            "user2" => {
+              optimistic: 4,
+              realistic: 4,
+              pessimistic: 4
+            }
           }
+        },
+        {
+          name: "name2",
+          estimate: nil,
+          estimates: {}
         }
-      },
-      {
-        name: "name2",
-        estimate: nil,
-        estimates: {}
-      }
-    ])
+      ])
 
     get "/"
+
+    expect(estimations).to have_received(:completed)
+      .with(hash_including(
+        room: nil
+      ))
 
     completed = html.css('[data-completed]')
 
@@ -82,13 +136,46 @@ RSpec.describe Web::App do
     expect(completed[1].css('[data-final-estimate]').map(&:text)).to eq ["-"]
   end
 
-  it 'adds an estimation' do
+  it 'adds an estimation (in the default room)' do
     post "/add", {"name"=>"::the name::", "description"=>""}
 
     expect(estimations).to have_received(:add).with(
+      room: nil,
       name: "::the name::",
       description: ""
     )
+    expect(last_response.status).to eq(302)
+    expect(last_response.header['Location']).to eq('/')
+  end
+
+  it 'adds an estimation in a specific room' do
+    post "/specific/room/add", {"name"=>"::the name::", "description"=>""}
+
+    expect(estimations).to have_received(:add).with(
+      room: "specific/room",
+      name: "::the name::",
+      description: ""
+    )
+    expect(last_response.status).to eq(302)
+    expect(last_response.header['Location']).to eq('/specific/room/')
+  end
+
+  it 'fails to add an estimation (in the default room)' do
+    given(:add, Result.failure(:the_reason))
+
+    post "/add", {"name"=>"::the name::", "description"=>""}
+
+    expect(last_response.status).to eq(302)
+    expect(last_response.header['Location']).to eq('/?error=the_reason')
+  end
+
+  it 'fails to add an estimation in a specific room' do
+    given(:add, Result.failure(:the_reason))
+
+    post "/specific/room/add", {"name"=>"::the name::", "description"=>""}
+
+    expect(last_response.status).to eq(302)
+    expect(last_response.header['Location']).to eq('/specific/room/?error=the_reason')
   end
 
   ['"', "'"].each do |conflicting_string|
@@ -115,7 +202,7 @@ RSpec.describe Web::App do
     end
   end
 
-  it 'submits an estimate' do
+  it 'submits an estimate (in the default room)' do
     post "/estimate", {
       "name"=>"::the name::",
       "user"=>"::the user::",
@@ -125,12 +212,15 @@ RSpec.describe Web::App do
     }
 
     expect(estimations).to have_received(:estimate).with(
+      room: nil,
       name: "::the name::",
       user: "::the user::",
       optimistic: 1,
       realistic: 4,
       pessimistic: 8
     )
+    expect(last_response.status).to eq(302)
+    expect(last_response.header['Location']).to eq('/')
   end
 
   ["optimistic", "realistic", "pessimistic"].each do |estimate|
@@ -146,12 +236,15 @@ RSpec.describe Web::App do
     end
   end
 
-  it 'completes an estimation' do
+  it 'completes an estimation (in the default room)' do
     post "/complete", {"name"=>"::the name::"}
 
     expect(estimations).to have_received(:complete).with(
+      room: nil,
       name: "::the name::"
     )
+    expect(last_response.status).to eq(302)
+    expect(last_response.header['Location']).to eq('/')
   end
 
   it 'has a way to add estimations' do
