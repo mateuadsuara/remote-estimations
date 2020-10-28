@@ -9,18 +9,19 @@ module Web
     def call(environment)
       if environment["REQUEST_METHOD"] == "POST"
         action = post_action(environment)
-        params = parse_post_params(environment)
+        params = post_params(environment)
         result = @estimations.send(action, **params)
-        return redirect(result)
+        return redirect(environment, result)
       end
 
       maybe_error = parse_error(environment)
-      html = render('index', @estimations, maybe_error)
+      maybe_room_name = room_name(environment)
+      html = render('index', @estimations, maybe_error, maybe_room_name)
       ['200', {'Content-Type' => 'text/html'}, [html]]
     end
 
     private
-    def render(template, estimations, maybe_error)
+    def render(template, estimations, maybe_error, maybe_room_name)
       ERB.new(File.new(File.expand_path(File.dirname(__FILE__) + "/#{template}.erb")).read).result(binding)
     end
 
@@ -29,10 +30,10 @@ module Web
     end
 
     def post_action(environment)
-      environment["PATH_INFO"].scan(/\/([a-z]*)/).first.first.to_sym
+      url_split(environment).last.to_sym
     end
 
-    def parse_post_params(environment)
+    def post_params(environment)
       body = environment["rack.input"].gets
 
       params = CGI::parse(body).map do |key, values|
@@ -43,7 +44,24 @@ module Web
         params[f] = Integer(params[f]) if params[f]
       end
 
-      params
+      params.merge(room: room_name(environment))
+    end
+
+    def room_name(environment)
+      url_split(environment).first[1..-1]
+    end
+
+    def room_url(environment)
+      room = room_name(environment)
+      if room
+        "/#{room}/"
+      else
+        '/'
+      end
+    end
+
+    def url_split(environment)
+      environment["PATH_INFO"].rpartition('/')
     end
 
     def parse_error(environment)
@@ -51,9 +69,11 @@ module Web
       get_params["error"]&.first
     end
 
-    def redirect(result)
-      location ||= result.succeeded { '/' }
-      location ||= result.failed { |reason| "/?error=#{reason}" }
+    def redirect(environment, result)
+      room_url = room_url(environment)
+
+      location ||= result.succeeded { room_url }
+      location ||= result.failed { |reason| "#{room_url}?error=#{reason}" }
 
       return ['302', {'Location' => location}, []]
     end
