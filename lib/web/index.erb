@@ -72,7 +72,7 @@
       </div>
       <h1>Completed estimations</h1>
       <div class="completed-estimations">
-        <% estimations.completed(room: maybe_room_name).each do |estimation| %>
+        <% estimations.completed(room: maybe_room_name).reverse.each do |estimation| %>
           <div class="completed-story" data-completed>
             <p><span data-estimation-name><%= estimation[:name] %></span> has been estimated at <span data-final-estimate><%= estimation[:estimate] || "-" %></span> points.</p>
             <ul>
