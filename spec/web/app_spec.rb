@@ -14,7 +14,7 @@ RSpec.describe Web::App do
   end
 
   before(:each) do
-    [:add, :estimate, :complete].each do |action|
+    [:add, :estimate, :complete, :cancel].each do |action|
       allow(estimations).to receive(action).and_return(Result.success)
     end
   end
@@ -218,6 +218,19 @@ RSpec.describe Web::App do
     end
   end
 
+  it 'cancels an estimation (in the default room)' do
+    post "/cancel", {
+      "name"=>"::the name::"
+    }
+
+    expect(estimations).to have_received(:cancel).with(
+      room: nil,
+      name: "::the name::"
+    )
+    expect(last_response.status).to eq(302)
+    expect(last_response.header['Location']).to eq('/')
+  end
+
   it 'submits an estimate (in the default room)' do
     post "/estimate", {
       "name"=>"::the name::",
@@ -267,6 +280,19 @@ RSpec.describe Web::App do
     get "/"
 
     form = html.css('form[action="add"][method="post"]').first
+    expect(form).not_to eq nil
+    expect(form.css('input[type="submit"]').length).to eq 1
+    expect(form.css('input[name="name"]').length).to eq 1
+  end
+
+  it 'has a way to cancel estimations' do
+    given(:in_progress, [
+      {name: "name1", estimates: []}
+    ])
+
+    get "/"
+
+    form = html.css('form[action="cancel"][method="post"]').first
     expect(form).not_to eq nil
     expect(form.css('input[type="submit"]').length).to eq 1
     expect(form.css('input[name="name"]').length).to eq 1
