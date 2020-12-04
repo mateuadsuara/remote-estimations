@@ -100,7 +100,7 @@ RSpec.describe Web::App do
     expect(in_progress[0].css('[data-user-name]').map(&:text)).to eq ["user1"]
   end
 
-  it 'on index shows completed estimations (in the default room)' do
+  it 'on index shows completed estimations in reverse order (in the default room)' do
     allow(estimations).to receive(:completed)
       .and_return([
         {
@@ -135,21 +135,21 @@ RSpec.describe Web::App do
 
     completed = html.css('[data-completed]')
 
-    expect(completed[0].css('[data-estimation-name]').map(&:text)).to eq ["name1"]
-    expect(completed[0].css('[data-final-estimate]').map(&:text)).to eq ["6.5"]
+    expect(completed[0].css('[data-user-estimate]').length).to eq 0
 
-    expect(completed[0].css('[data-user-estimate]').length).to eq 2
+    expect(completed[0].css('[data-estimation-name]').map(&:text)).to eq ["name2"]
+    expect(completed[0].css('[data-final-estimate]').map(&:text)).to eq ["-"]
 
-    expect(completed[0].css('[data-user-estimate]')[0].css('[data-user-name]').map(&:text)).to eq ["user1"]
-    expect(completed[0].css('[data-user-estimate]')[0].css('[data-user-estimates]').map(&:text)).to eq ["1/4/8"]
+    expect(completed[1].css('[data-estimation-name]').map(&:text)).to eq ["name1"]
+    expect(completed[1].css('[data-final-estimate]').map(&:text)).to eq ["6.5"]
 
-    expect(completed[0].css('[data-user-estimate]')[1].css('[data-user-name]').map(&:text)).to eq ["user2"]
-    expect(completed[0].css('[data-user-estimate]')[1].css('[data-user-estimates]').map(&:text)).to eq ["4/4/4"]
+    expect(completed[1].css('[data-user-estimate]').length).to eq 2
 
-    expect(completed[1].css('[data-user-estimate]').length).to eq 0
+    expect(completed[1].css('[data-user-estimate]')[0].css('[data-user-name]').map(&:text)).to eq ["user1"]
+    expect(completed[1].css('[data-user-estimate]')[0].css('[data-user-estimates]').map(&:text)).to eq ["1/4/8"]
 
-    expect(completed[1].css('[data-estimation-name]').map(&:text)).to eq ["name2"]
-    expect(completed[1].css('[data-final-estimate]').map(&:text)).to eq ["-"]
+    expect(completed[1].css('[data-user-estimate]')[1].css('[data-user-name]').map(&:text)).to eq ["user2"]
+    expect(completed[1].css('[data-user-estimate]')[1].css('[data-user-estimates]').map(&:text)).to eq ["4/4/4"]
   end
 
   it 'adds an estimation (in the default room)' do
