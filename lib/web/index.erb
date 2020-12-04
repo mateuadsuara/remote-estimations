@@ -86,6 +86,10 @@
           </div>
         <% end %>
       </div>
+
+      <% if maybe_room_name %>
+        <p>You're on room <a href="/<%= maybe_room_name %>"><%= maybe_room_name %></a>. The default room is <a href="/">here</a>.</p>
+      <% end %>
     </div>
   </body>
 </html>
