@@ -126,6 +126,10 @@ div[data-error] {
   height: 30px;
 }
 
+.cancel-form {
+  display: inline;
+}
+
 .estimations-in-progress, .completed-estimations {
   display: flex;
   flex-wrap: wrap;

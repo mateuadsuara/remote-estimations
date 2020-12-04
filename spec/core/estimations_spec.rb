@@ -79,6 +79,78 @@ RSpec.describe Core::Estimations do
     expect(estimations.completed).to eq []
   end
 
+  it 'cannot be cancelled before added' do
+    cancellation = estimations.cancel(
+      name: "::the name::"
+    )
+
+    expect(cancellation).to eq Result.failure(:nonexistent_name)
+  end
+
+  it 'can be cancelled before estimated' do
+    estimations.add(
+      name: "::the name::",
+      description: "::the description::"
+    )
+
+    cancellation = estimations.cancel(
+      name: "::the name::"
+    )
+
+    expect(cancellation).to eq Result.success
+    expect(estimations.in_progress).to eq []
+    expect(estimations.completed).to eq []
+  end
+
+  it 'can be added again after cancelled' do
+    estimations.add(
+      name: "::the name::",
+      description: "::the description 1::"
+    )
+
+    estimations.cancel(
+      name: "::the name::"
+    )
+
+    addition = estimations.add(
+      name: "::the name::",
+      description: "::the description 2::"
+    )
+
+    expect(addition).to eq Result.success
+    expect(estimations.in_progress).to eq [{
+      name: "::the name::",
+      description: "::the description 2::",
+      estimates: []
+    }]
+  end
+
+  it 'cannot be cancelled after estimated' do
+    estimations.add(
+      name: "::the name::",
+      description: "::the description::"
+    )
+
+    estimations.estimate(
+      name: "::the name::",
+      user: "::the user 1::",
+      optimistic: 1,
+      realistic: 2,
+      pessimistic: 4
+    )
+
+    cancellation = estimations.cancel(
+      name: "::the name::"
+    )
+
+    expect(cancellation).to eq Result.failure(:already_estimated)
+    expect(estimations.in_progress).to eq [{
+      name: "::the name::",
+      description: "::the description::",
+      estimates: ["::the user 1::"]
+    }]
+  end
+
   it 'cannot estimate with empty user' do
     estimations.add(
       name: "::the name::",

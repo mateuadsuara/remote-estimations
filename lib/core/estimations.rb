@@ -21,6 +21,23 @@ module Core
       Result.success
     end
 
+    def cancel(room: nil, name:)
+      estimations = estimations_in(room)
+      estimation = estimations.find{|e|e[:name] == name}
+      return Result.failure(:nonexistent_name) if !estimation
+      return Result.failure(:already_estimated) unless estimation[:estimates].empty?
+
+      estimations.map! do |estimation|
+        if estimation[:name] == name
+          nil
+        else
+          estimation
+        end
+      end.compact!
+
+      Result.success
+    end
+
     def complete(room: nil, name:)
       estimations = estimations_in(room)
       estimation = estimations.find{|e|e[:name] == name}
