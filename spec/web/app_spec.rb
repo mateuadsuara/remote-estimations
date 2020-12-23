@@ -194,28 +194,38 @@ RSpec.describe Web::App do
     expect(last_response.header['Location']).to eq('/specific/room/?error=the_reason')
   end
 
-  ['"', "'"].each do |conflicting_string|
-    it "escapes the conflicting name #{conflicting_string} in the estimate form" do
-      given(:in_progress, [
-        {name: conflicting_string, estimates: []}
-      ])
+  it 'escapes the user input in html (to avoid XSS attacks)' do
+    user_input = %(&<>"')
 
-      get "/"
+    given(:in_progress, [
+      {
+        name: user_input,
+        estimates: []
+      },
+      {
+        name: user_input,
+        estimates: [
+          user_input
+        ]
+      }
+    ])
+    given(:completed, [
+      {
+        name: user_input,
+        estimate: 1,
+        estimates: {
+          user_input => {
+            optimistic: 1,
+            realistic: 1,
+            pessimistic: 1
+          }
+        }
+      }
+    ])
 
-      attributes = html.css("form[action=estimate] input[name=name]").first.attributes
-      expect(attributes["value"].value).to eq conflicting_string
-    end
+    get "/"
 
-    it "escapes the conflicting name #{conflicting_string} in the complete form" do
-      given(:in_progress, [
-        {name: conflicting_string, estimates: ["user1"]}
-      ])
-
-      get "/"
-
-      attributes = html.css("form[action=complete] input[name=name]").first.attributes
-      expect(attributes["value"].value).to eq conflicting_string
-    end
+    expect(last_response.body).not_to include user_input
   end
 
   it 'cancels an estimation (in the default room)' do
