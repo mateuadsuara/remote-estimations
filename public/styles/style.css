@@ -81,7 +81,7 @@ input[type=submit]:hover, input[type=submit]:focus {
 .bubble {
   width: 250px;
   height: 64px;
-  background: #FF9494;
+  background: #721a1a;
   position: relative;
   -moz-border-radius:    10px;
   -webkit-border-radius: 10px;
@@ -97,7 +97,7 @@ input[type=submit]:hover, input[type=submit]:focus {
   width: 0;
   height: 0;
   border-top: 13px solid transparent;
-  border-right: 26px solid #FF9494;
+  border-right: 26px solid #721a1a;
   border-bottom: 13px solid transparent;
 }
 
