@@ -11,7 +11,7 @@
       <div class="container">
         <h3>You're on the default room! Other people might be seeing this room as well. Maybe you want a separate room?</h3>
         <form action="/take_to_room" method="get">
-          <p><label for="take_to_room_name">I would like to go to the room named: <input id="take_to_room_name" type="text" name="room_name" required> <input type="submit" value="Take me there!"></label></p>
+          <p><label for="take_to_room_name">I would like to go to the <b><u>#r</u></b>oom named: <input id="take_to_room_name" accesskey="r" type="text" name="room_name" required> <input type="submit" value="Take me there!"></label></p>
         </form>
       </div>
     <% end %>
@@ -28,7 +28,7 @@
 
       <form action="add" method="post">
         <div class="story-name-input">
-          <h3><label for="add_story_name">I would like to get an estimate for the story: <input id="add_story_name" class="story-title" type="text" name="name" value="" required></label></h3>
+          <h3><label for="add_story_name">I would like to get an estimate for the <b><u>#s</u></b>tory: <input id="add_story_name" accesskey="s" class="story-title" type="text" name="name" value="" required></label></h3>
           <input type="hidden" name="description" value="">
           <input class="story-name-input_button" type="submit" value="Please estimate it.">
         </div>
@@ -38,13 +38,25 @@
       <% unless in_progress_estimations.empty? %>
         <h1>Stories currently being estimated</h1>
         <div class="estimations-in-progress">
-          <% in_progress_estimations.each do |estimation| %>
+          <% in_progress_estimations.each_with_index do |estimation, index| %>
             <% estimation_name = escape(estimation[:name]) %>
+            <% accesskey = index < 10 ? (index + 1) % 10 : nil %>
             <div class="estimation-in-progress" data-in-progress>
-              <h2 class="story-to-estimate">We are estimating the story <span data-estimation-name><%= estimation_name %></span>.</h2>
+              <h2 class="story-to-estimate"><span class=""><b><u><%= accesskey ? "##{accesskey}" : "" %></u></b></span> We are estimating the story <span data-estimation-name><%= estimation_name %></span>.</h2>
+              <div class="my-estimate">
+                <h3>Here's my estimation:</h3>
+                <form action="estimate" method="post">
+                  <input type="hidden" name="name" value="<%= estimation_name %>">
+                  <p><label for="estimate_user">I am <input id="estimate_user" accesskey="<%= accesskey %>" type="text" name="user" value="<%= escape(maybe_user) %>" required>.</label></p>
+                  <p><label for="estimate_optimistic">If I think optimistically, <span data-estimation-name><%= estimation_name %></span> could take <input id="estimate_optimistic" type="number" name="optimistic" value="" required> points to achieve.</label></p>
+                  <p><label for="estimate_realistic">Thinking realistically, I guess it would take <input id="estimate_realistic" type="number" name="realistic" value="" required> points.</label></p>
+                  <p><label for="estimate_pessimistic">And being pessimistic, it might take <input id="estimate_pessimistic" type="number" name="pessimistic" value="" required> points.</label></p>
+                  <input type="submit" value="I think that's about right. Please take my point of view into consideration.">
+                </form>
+              </div>
               <div class="all-estimates-per-story">
                 <% if estimation[:estimates].empty? %>
-                  <span>No one estimated yet.</span>
+                  <p>No one estimated yet.</p>
                   <form class="cancel-form" action="cancel" method="post">
                     <input type="hidden" name="name" value="<%= estimation_name %>">
                     <input type="submit" value="Cancel estimation.">
@@ -57,17 +69,6 @@
                   </form>
                 <% end %>
               </div>
-              <div class="my-estimate">
-                <h3>Here's my estimation:</h3>
-                <form action="estimate" method="post">
-                  <input type="hidden" name="name" value="<%= estimation_name %>">
-                  <p><label for="estimate_user">I am <input id="estimate_user" type="text" name="user" value="<%= escape(maybe_user) %>" required>.</label></p>
-                  <p><label for="estimate_optimistic">If I think optimistically, <span data-estimation-name><%= estimation_name %></span> could take <input id="estimate_optimistic" type="number" name="optimistic" value="" required> points to achieve.</label></p>
-                  <p><label for="estimate_realistic">Thinking realistically, I guess it would take <input id="estimate_realistic" type="number" name="realistic" value="" required> points.</label></p>
-                  <p><label for="estimate_pessimistic">And being pessimistic, it might take <input id="estimate_pessimistic" type="number" name="pessimistic" value="" required> points.</label></p>
-                  <input type="submit" value="I think that's about right. Please take my point of view into consideration.">
-                </form>
-              </div>
             </div>
             <% end %>
         </div>
@@ -75,9 +76,7 @@
 
       <% completed_estimations = estimations.completed(room: maybe_room_name) %>
       <% unless completed_estimations.empty? %>
-        <a id="completed">
-          <h1>Completed estimations</h1>
-        </a>
+        <h1><a id="completed" accesskey="c" href="#completed"><b><u>#C</u></b>ompleted estimations</a></h1>
         <div class="completed-estimations">
           <% completed_estimations.sort_by{|e| e[:order]}.reverse.each do |estimation| %>
             <div class="completed-story" data-completed>
@@ -95,7 +94,7 @@
       <% end %>
 
       <% if maybe_room_name %>
-        <p>You're on room <a href="/<%= maybe_room_name %>"><%= maybe_room_name %></a>. The default room is <a href="/">here</a>.</p>
+        <p>You're on room <a href="/<%= maybe_room_name %>"><%= maybe_room_name %></a>. The default <b><u>#r</u></b>oom is <a accesskey="r" href="/">here</a>.</p>
       <% end %>
     </div>
   </body>
