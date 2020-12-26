@@ -311,7 +311,18 @@ RSpec.describe Web::App do
     )
     expect(last_response.status).to eq(302)
     expect(last_response.headers).to eq({
-      'Location'=>'/'
+      'Location'=>'/#completed'
+    })
+  end
+
+  it 'fails to complete an estimation (in the default room)' do
+    given(:complete, Result.failure(:the_reason))
+
+    post "/complete", {"name"=>"::the name::"}
+
+    expect(last_response.status).to eq(302)
+    expect(last_response.headers).to eq({
+      'Location'=>'/?error=the_reason'
     })
   end
 

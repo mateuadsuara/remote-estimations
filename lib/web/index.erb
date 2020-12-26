@@ -76,7 +76,9 @@
 
       <% completed_estimations = estimations.completed(room: maybe_room_name) %>
       <% unless completed_estimations.empty? %>
-        <h1>Completed estimations</h1>
+        <a id="completed">
+          <h1>Completed estimations</h1>
+        </a>
         <div class="completed-estimations">
           <% completed_estimations.reverse.each do |estimation| %>
             <div class="completed-story" data-completed>
