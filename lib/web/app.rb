@@ -38,6 +38,7 @@ module Web
       estimations = @estimations
       maybe_error = parse_error(environment)
       maybe_room_name = room_name(environment)
+      maybe_user = get_cookie(environment)[:user]
       ERB.new(File.new(File.expand_path(File.dirname(__FILE__) + "/#{template}.erb")).read).result(binding)
     end
 
@@ -101,6 +102,12 @@ module Web
         "#{k}=#{v}; Path=/; HttpOnly"
       end.join("\n")
       {'Set-Cookie' => cookie}
+    end
+
+    def get_cookie(environment)
+      CGI::parse(environment["HTTP_COOKIE"] || "").map do |key, values|
+        [key.strip.to_sym, values.first]
+      end.to_h
     end
   end
 end

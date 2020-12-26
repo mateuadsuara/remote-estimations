@@ -210,38 +210,42 @@ RSpec.describe Web::App do
     })
   end
 
-  it 'escapes the user input in html (to avoid XSS attacks)' do
-    user_input = %(&<>"')
+  ["&", "<", ">", '"', "'"].each do |problematic_input|
+    it "escapes the user input (#{problematic_input}) in html (to avoid XSS attacks)" do
+      user_input = "xss#{problematic_input}xss"
 
-    given(:in_progress, [
-      {
-        name: user_input,
-        estimates: []
-      },
-      {
-        name: user_input,
-        estimates: [
-          user_input
-        ]
-      }
-    ])
-    given(:completed, [
-      {
-        name: user_input,
-        estimate: 1,
-        estimates: {
-          user_input => {
-            optimistic: 1,
-            realistic: 1,
-            pessimistic: 1
+      given(:in_progress, [
+        {
+          name: user_input,
+          estimates: []
+        },
+        {
+          name: user_input,
+          estimates: [
+            user_input
+          ]
+        }
+      ])
+      given(:completed, [
+        {
+          name: user_input,
+          estimate: 1,
+          estimates: {
+            user_input => {
+              optimistic: 1,
+              realistic: 1,
+              pessimistic: 1
+            }
           }
         }
+      ])
+
+      get "/", nil, {
+        cookie: " user=#{user_input}"
       }
-    ])
 
-    get "/"
-
-    expect(last_response.body).not_to include user_input
+      expect(last_response.body).not_to include user_input
+    end
   end
 
   it 'cancels an estimation (in the default room)' do
@@ -334,17 +338,23 @@ RSpec.describe Web::App do
   end
 
   it 'has a way to submit an estimate' do
+    user = "::the user::"
+
     given(:in_progress, [
       {name: "name1", estimates: []}
     ])
 
-    get "/"
+    get "/", nil, {
+      cookie: " user=#{user}"
+    }
 
     form = html.css('form[action="estimate"][method="post"]').first
     expect(form).not_to eq nil
     expect(form.css('input[type="submit"]').length).to eq 1
     expect(form.css('input[name="name"]').length).to eq 1
-    expect(form.css('input[name="user"]').length).to eq 1
+    user_input = form.css('input[name="user"]')
+    expect(user_input.length).to eq 1
+    expect(user_input.first.attributes["value"].value).to eq user
     expect(form.css('input[name="optimistic"]').length).to eq 1
     expect(form.css('input[name="realistic"]').length).to eq 1
     expect(form.css('input[name="pessimistic"]').length).to eq 1
