@@ -525,6 +525,10 @@ RSpec.describe Core::Estimations do
 
   it 'that are completed show the users who participated with their estimates and the final pert estimate' do
     estimations.add(
+      name: "::estimation2::",
+      description: "::description2::"
+    )
+    estimations.add(
       name: "::estimation1::",
       description: "::description1::"
     )
@@ -545,10 +549,6 @@ RSpec.describe Core::Estimations do
     estimations.complete(
       name: "::estimation1::"
     )
-    estimations.add(
-      name: "::estimation2::",
-      description: "::description2::"
-    )
     estimations.estimate(
       name: "::estimation2::",
       user: "::user2::",
@@ -566,9 +566,23 @@ RSpec.describe Core::Estimations do
 
     expect(estimations.completed).to eq([
       {
+        name: "::estimation2::",
+        description: "::description2::",
+        estimate: 8,
+        order: 2,
+        estimates: {
+          "::user2::" => {
+            optimistic: 8,
+            realistic: 8,
+            pessimistic: 8
+          }
+        }
+      },
+      {
         name: "::estimation1::",
         description: "::description1::",
         estimate: 6.5,
+        order: 1,
         estimates: {
           "::user1::" => {
             optimistic: 1,
@@ -579,18 +593,6 @@ RSpec.describe Core::Estimations do
             optimistic: 4,
             realistic: 4,
             pessimistic: 4
-          }
-        }
-      },
-      {
-        name: "::estimation2::",
-        description: "::description2::",
-        estimate: 8,
-        estimates: {
-          "::user2::" => {
-            optimistic: 8,
-            realistic: 8,
-            pessimistic: 8
           }
         }
       }

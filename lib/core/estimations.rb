@@ -45,9 +45,16 @@ module Core
       return Result.failure(:completed_previously) if estimation[:completed]
       return Result.failure(:unestimated) if estimation[:estimates].empty?
 
+      last_order = estimations
+        .select{|e| e[:completed]}
+        .map{|e| e[:order]}
+        .max || 0
       estimations.map! do |estimation|
         if estimation[:name] == name
-          estimation.merge(completed: true)
+          estimation.merge(
+            completed: true,
+            order: last_order + 1
+          )
         else
           estimation
         end
