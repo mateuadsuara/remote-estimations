@@ -16,6 +16,10 @@ input[type=text], input[type=number] {
   font-size: 16px;
 }
 
+h2 {
+  font-weight: normal;
+}
+
 input[type=number] {
   width: 45px;
 }
@@ -33,9 +37,9 @@ input[type=submit] {
   font-weight: 400;
   outline: none;
   position: relative;
-  background: #cb4e4e;
+  background: #721a1a;
   color: #fff;
-  box-shadow: 0 6px #ab3c3c;
+  box-shadow: 0 6px #570606;
   -webkit-transition: none;
   -moz-transition: none;
   transition: none;
@@ -43,8 +47,10 @@ input[type=submit] {
   margin-top: 10px;
 }
 
-input[type=submit]:hover {
-  box-shadow: 0 4px #ab3c3c;
+input[type=submit]:hover, input[type=submit]:focus {
+  color: #000;
+  background: #ffd2d2;
+  box-shadow: 0 4px #ffa0a0;
   top: 2px;
 }
 
@@ -172,7 +178,7 @@ div[data-error] {
 
 .my-estimate {
   margin-bottom: 20px;
-  border-top: 2px dashed #cb4e4e;
+  border-top: 2px dashed #721a1a;
 }
 
 @media only screen and (max-width: 1422px) {
