@@ -23,7 +23,9 @@ RSpec.describe Web::App do
     get "/room_name"
 
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/room_name/')
+    expect(last_response.headers).to eq({
+      'Location'=>'/room_name/'
+    })
   end
 
   it 'on index (in the default room) shows a form to go to a separate room' do
@@ -41,21 +43,27 @@ RSpec.describe Web::App do
     get "/take_to_room?room_name= specific /room"
 
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/+specific+%2Froom/')
+    expect(last_response.headers).to eq({
+      'Location'=>'/+specific+%2Froom/'
+    })
   end
 
   it 'take to empty room redirects to the default room' do
     get "/take_to_room?room_name="
 
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/')
+    expect(last_response.headers).to eq({
+      'Location'=>'/'
+    })
   end
 
   it 'take to nil room redirects to the default room' do
     get "/take_to_room"
 
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/')
+    expect(last_response.headers).to eq({
+      'Location'=>'/'
+    })
   end
 
   it 'on index shows in progress estimations (in the default room)' do
@@ -161,7 +169,9 @@ RSpec.describe Web::App do
       description: ""
     )
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/')
+    expect(last_response.headers).to eq({
+      'Location'=>'/'
+    })
   end
 
   it 'adds an estimation in a specific room' do
@@ -173,7 +183,9 @@ RSpec.describe Web::App do
       description: ""
     )
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/specific/room/')
+    expect(last_response.headers).to eq({
+      'Location'=>'/specific/room/'
+    })
   end
 
   it 'fails to add an estimation (in the default room)' do
@@ -182,7 +194,9 @@ RSpec.describe Web::App do
     post "/add", {"name"=>"::the name::", "description"=>""}
 
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/?error=the_reason')
+    expect(last_response.headers).to eq({
+      'Location'=>'/?error=the_reason'
+    })
   end
 
   it 'fails to add an estimation in a specific room' do
@@ -191,7 +205,9 @@ RSpec.describe Web::App do
     post "/specific/room/add", {"name"=>"::the name::", "description"=>""}
 
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/specific/room/?error=the_reason')
+    expect(last_response.headers).to eq({
+      'Location'=>'/specific/room/?error=the_reason'
+    })
   end
 
   it 'escapes the user input in html (to avoid XSS attacks)' do
@@ -259,7 +275,9 @@ RSpec.describe Web::App do
       pessimistic: 8
     )
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/')
+    expect(last_response.headers).to eq({
+      'Location'=>'/'
+    })
   end
 
   ["optimistic", "realistic", "pessimistic"].each do |estimate|
@@ -283,7 +301,9 @@ RSpec.describe Web::App do
       name: "::the name::"
     )
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/')
+    expect(last_response.headers).to eq({
+      'Location'=>'/'
+    })
   end
 
   it 'has a way to add estimations' do
