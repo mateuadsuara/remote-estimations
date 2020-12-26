@@ -23,7 +23,9 @@ RSpec.describe Web::App do
     get "/room_name"
 
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/room_name/')
+    expect(last_response.headers).to eq({
+      'Location'=>'/room_name/'
+    })
   end
 
   it 'on index (in the default room) shows a form to go to a separate room' do
@@ -41,21 +43,27 @@ RSpec.describe Web::App do
     get "/take_to_room?room_name= specific /room"
 
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/+specific+%2Froom/')
+    expect(last_response.headers).to eq({
+      'Location'=>'/+specific+%2Froom/'
+    })
   end
 
   it 'take to empty room redirects to the default room' do
     get "/take_to_room?room_name="
 
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/')
+    expect(last_response.headers).to eq({
+      'Location'=>'/'
+    })
   end
 
   it 'take to nil room redirects to the default room' do
     get "/take_to_room"
 
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/')
+    expect(last_response.headers).to eq({
+      'Location'=>'/'
+    })
   end
 
   it 'on index shows in progress estimations (in the default room)' do
@@ -161,7 +169,9 @@ RSpec.describe Web::App do
       description: ""
     )
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/')
+    expect(last_response.headers).to eq({
+      'Location'=>'/'
+    })
   end
 
   it 'adds an estimation in a specific room' do
@@ -173,7 +183,9 @@ RSpec.describe Web::App do
       description: ""
     )
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/specific/room/')
+    expect(last_response.headers).to eq({
+      'Location'=>'/specific/room/'
+    })
   end
 
   it 'fails to add an estimation (in the default room)' do
@@ -182,7 +194,9 @@ RSpec.describe Web::App do
     post "/add", {"name"=>"::the name::", "description"=>""}
 
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/?error=the_reason')
+    expect(last_response.headers).to eq({
+      'Location'=>'/?error=the_reason'
+    })
   end
 
   it 'fails to add an estimation in a specific room' do
@@ -191,41 +205,47 @@ RSpec.describe Web::App do
     post "/specific/room/add", {"name"=>"::the name::", "description"=>""}
 
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/specific/room/?error=the_reason')
+    expect(last_response.headers).to eq({
+      'Location'=>'/specific/room/?error=the_reason'
+    })
   end
 
-  it 'escapes the user input in html (to avoid XSS attacks)' do
-    user_input = %(&<>"')
+  ["&", "<", ">", '"', "'"].each do |problematic_input|
+    it "escapes the user input (#{problematic_input}) in html (to avoid XSS attacks)" do
+      user_input = "xss#{problematic_input}xss"
 
-    given(:in_progress, [
-      {
-        name: user_input,
-        estimates: []
-      },
-      {
-        name: user_input,
-        estimates: [
-          user_input
-        ]
-      }
-    ])
-    given(:completed, [
-      {
-        name: user_input,
-        estimate: 1,
-        estimates: {
-          user_input => {
-            optimistic: 1,
-            realistic: 1,
-            pessimistic: 1
+      given(:in_progress, [
+        {
+          name: user_input,
+          estimates: []
+        },
+        {
+          name: user_input,
+          estimates: [
+            user_input
+          ]
+        }
+      ])
+      given(:completed, [
+        {
+          name: user_input,
+          estimate: 1,
+          estimates: {
+            user_input => {
+              optimistic: 1,
+              realistic: 1,
+              pessimistic: 1
+            }
           }
         }
+      ])
+
+      get "/", nil, {
+        cookie: " user=#{user_input}"
       }
-    ])
 
-    get "/"
-
-    expect(last_response.body).not_to include user_input
+      expect(last_response.body).not_to include user_input
+    end
   end
 
   it 'cancels an estimation (in the default room)' do
@@ -238,13 +258,17 @@ RSpec.describe Web::App do
       name: "::the name::"
     )
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/')
+    expect(last_response.headers).to eq({
+      'Location'=>'/'
+    })
   end
 
   it 'submits an estimate (in the default room)' do
+    user = "::the user::"
+
     post "/estimate", {
       "name"=>"::the name::",
-      "user"=>"::the user::",
+      "user"=>user,
       "optimistic"=>"1",
       "realistic"=>"4",
       "pessimistic"=>"8"
@@ -253,13 +277,16 @@ RSpec.describe Web::App do
     expect(estimations).to have_received(:estimate).with(
       room: nil,
       name: "::the name::",
-      user: "::the user::",
+      user: user,
       optimistic: 1,
       realistic: 4,
       pessimistic: 8
     )
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/')
+    expect(last_response.headers).to eq({
+      'Location'=>'/',
+      'Set-Cookie'=>"user=#{user}; Path=/; HttpOnly"
+    })
   end
 
   ["optimistic", "realistic", "pessimistic"].each do |estimate|
@@ -283,7 +310,9 @@ RSpec.describe Web::App do
       name: "::the name::"
     )
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/')
+    expect(last_response.headers).to eq({
+      'Location'=>'/'
+    })
   end
 
   it 'has a way to add estimations' do
@@ -309,17 +338,23 @@ RSpec.describe Web::App do
   end
 
   it 'has a way to submit an estimate' do
+    user = "::the user::"
+
     given(:in_progress, [
       {name: "name1", estimates: []}
     ])
 
-    get "/"
+    get "/", nil, {
+      cookie: " user=#{user}"
+    }
 
     form = html.css('form[action="estimate"][method="post"]').first
     expect(form).not_to eq nil
     expect(form.css('input[type="submit"]').length).to eq 1
     expect(form.css('input[name="name"]').length).to eq 1
-    expect(form.css('input[name="user"]').length).to eq 1
+    user_input = form.css('input[name="user"]')
+    expect(user_input.length).to eq 1
+    expect(user_input.first.attributes["value"].value).to eq user
     expect(form.css('input[name="optimistic"]').length).to eq 1
     expect(form.css('input[name="realistic"]').length).to eq 1
     expect(form.css('input[name="pessimistic"]').length).to eq 1

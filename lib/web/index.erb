@@ -62,7 +62,7 @@
                 <h3>Here's my estimation:</h3>
                 <form action="estimate" method="post">
                   <input type="hidden" name="name" value="<%= estimation_name %>">
-                  <p>I am <input type="text" name="user" value="" required>.</p>
+                  <p>I am <input type="text" name="user" value="<%= escape(maybe_user) %>" required>.</p>
                   <p>If I think optimistically, <span data-estimation-name><%= estimation_name %></span> could take <input type="number" name="optimistic" value="" required> points to achieve.</p>
                   <p>Thinking realistically, I guess it would take <input type="number" name="realistic" value="" required> points.</p>
                   <p>And being pessimistic, it might take <input type="number" name="pessimistic" value="" required> points.</p>

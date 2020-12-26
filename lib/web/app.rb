@@ -14,17 +14,23 @@ module Web
         action = post_action(environment)
         params = post_params(environment)
         result = @estimations.send(action, **params)
-        return redirect_result(environment, result)
+
+        room_url = room_url(room_name(environment))
+        location = result.unwrap(room_url) do |failure_reason|
+          "#{room_url}?error=#{failure_reason}"
+        end
+        cookie_header = set_cookie(user: params[:user]) if params[:user]
+        return redirect_to(location, cookie_header)
       end
 
       if url == "/take_to_room"
-        return redirect_to_room(environment)
+        room_name = CGI::escape(get_params(environment)["room_name"].first || "")
+        return redirect_to(room_url(room_name))
       end
 
       return redirect_to("#{url}/") unless url.end_with?('/')
 
-      html = render('index', environment)
-      ['200', {'Content-Type' => 'text/html'}, [html]]
+      ok(render('index', environment))
     end
 
     private
@@ -32,6 +38,7 @@ module Web
       estimations = @estimations
       maybe_error = parse_error(environment)
       maybe_room_name = room_name(environment)
+      maybe_user = get_cookie(environment)[:user]
       ERB.new(File.new(File.expand_path(File.dirname(__FILE__) + "/#{template}.erb")).read).result(binding)
     end
 
@@ -81,21 +88,26 @@ module Web
       CGI::parse(environment["QUERY_STRING"])
     end
 
-    def redirect_result(environment, result)
-      room_url = room_url(room_name(environment))
-
-      location = result.unwrap(room_url){ |failure_reason| "#{room_url}?error=#{failure_reason}" }
-
-      return redirect_to(location)
+    def redirect_to(location, additional_headers = nil)
+      additional_headers ||= {}
+      ['302', {'Location' => location}.merge(additional_headers), []]
     end
 
-    def redirect_to_room(environment)
-      room_name = CGI::escape(get_params(environment)["room_name"].first || "")
-      return redirect_to(room_url(room_name))
+    def ok(body)
+      ['200', {'Content-Type' => 'text/html'}, [body]]
     end
 
-    def redirect_to(location)
-      return ['302', {'Location' => location}, []]
+    def set_cookie(values = {})
+      cookie = values.map do |k,v|
+        "#{k}=#{v}; Path=/; HttpOnly"
+      end.join("\n")
+      {'Set-Cookie' => cookie}
+    end
+
+    def get_cookie(environment)
+      CGI::parse(environment["HTTP_COOKIE"] || "").map do |key, values|
+        [key.strip.to_sym, values.first]
+      end.to_h
     end
   end
 end
