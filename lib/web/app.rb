@@ -16,7 +16,8 @@ module Web
         result = @estimations.send(action, **params)
 
         room_url = room_url(room_name(environment))
-        location = result.unwrap(room_url) do |failure_reason|
+        success_url = room_url + (action == :complete ? "#completed" : "")
+        location = result.unwrap(success_url) do |failure_reason|
           "#{room_url}?error=#{failure_reason}"
         end
         cookie_header = set_cookie(user: params[:user]) if params[:user]
