@@ -47,10 +47,14 @@
                 <h3>Here's my estimation:</h3>
                 <form action="estimate" method="post">
                   <input type="hidden" name="name" value="<%= estimation_name %>">
-                  <p><label for="estimate_user">I am <input id="estimate_user" accesskey="<%= accesskey %>" type="text" name="user" value="<%= escape(maybe_user) %>" required>.</label></p>
-                  <p><label for="estimate_optimistic">If I think optimistically, <span data-estimation-name><%= estimation_name %></span> could take <input id="estimate_optimistic" type="number" name="optimistic" value="" required> points to achieve.</label></p>
-                  <p><label for="estimate_realistic">Thinking realistically, I guess it would take <input id="estimate_realistic" type="number" name="realistic" value="" required> points.</label></p>
-                  <p><label for="estimate_pessimistic">And being pessimistic, it might take <input id="estimate_pessimistic" type="number" name="pessimistic" value="" required> points.</label></p>
+                  <% user_ref = "estimate_#{index}_user" %>
+                  <p><label for="<%= user_ref %>">I am <input id="<%= user_ref %>" accesskey="<%= accesskey %>" type="text" name="user" value="<%= escape(maybe_user) %>" required>.</label></p>
+                  <% optimistic_ref = "estimate_#{index}_optimistic" %>
+                  <p><label for="<%= optimistic_ref %>">If I think optimistically, <span data-estimation-name><%= estimation_name %></span> could take <input id="<%= optimistic_ref %>" type="number" name="optimistic" value="" required> points to achieve.</label></p>
+                  <% realistic_ref = "estimate_#{index}_realistic" %>
+                  <p><label for="<%= realistic_ref %>">Thinking realistically, I guess it would take <input id="<%= realistic_ref %>" type="number" name="realistic" value="" required> points.</label></p>
+                  <% pessimistic_ref = "estimate_#{index}_pessimistic" %>
+                  <p><label for="<%= pessimistic_ref %>">And being pessimistic, it might take <input id="<%= pessimistic_ref %>" type="number" name="pessimistic" value="" required> points.</label></p>
                   <input type="submit" value="I think that's about right. Please take my point of view into consideration.">
                 </form>
               </div>
