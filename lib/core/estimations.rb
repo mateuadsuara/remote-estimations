@@ -15,7 +15,6 @@ module Core
       estimations << {
         name: name,
         description: description,
-        completed: false,
         estimates: {}
       }
       Result.success
@@ -45,20 +44,10 @@ module Core
       return Result.failure(:completed_previously) if estimation[:completed]
       return Result.failure(:unestimated) if estimation[:estimates].empty?
 
-      last_order = estimations
-        .select{|e| e[:completed]}
-        .map{|e| e[:order]}
-        .max || 0
-      estimations.map! do |estimation|
-        if estimation[:name] == name
-          estimation.merge(
-            completed: true,
-            order: last_order + 1
-          )
-        else
-          estimation
-        end
-      end
+      last_order = estimations.select{|e| e[:completed]}.map{|e| e[:order]}.max || 0
+      estimation[:order] = last_order + 1
+      estimation[:completed] = true
+
       Result.success
     end
 
@@ -95,7 +84,6 @@ module Core
         !estimation[:completed]
       end.map do |estimation|
         h = estimation.clone
-        h.delete(:completed)
         h[:estimates] = estimation[:estimates].keys
         h
       end
