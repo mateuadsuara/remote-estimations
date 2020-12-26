@@ -114,6 +114,7 @@ RSpec.describe Web::App do
         {
           name: "name1",
           estimate: 6.5,
+          order: 2,
           estimates: {
             "user1" => {
               optimistic: 1,
@@ -130,6 +131,13 @@ RSpec.describe Web::App do
         {
           name: "name2",
           estimate: nil,
+          order: 1,
+          estimates: {}
+        },
+        {
+          name: "name3",
+          estimate: nil,
+          order: 3,
           estimates: {}
         }
       ])
@@ -145,7 +153,7 @@ RSpec.describe Web::App do
 
     expect(completed[0].css('[data-user-estimate]').length).to eq 0
 
-    expect(completed[0].css('[data-estimation-name]').map(&:text)).to eq ["name2"]
+    expect(completed[0].css('[data-estimation-name]').map(&:text)).to eq ["name3"]
     expect(completed[0].css('[data-final-estimate]').map(&:text)).to eq ["-"]
 
     expect(completed[1].css('[data-estimation-name]').map(&:text)).to eq ["name1"]
@@ -158,6 +166,11 @@ RSpec.describe Web::App do
 
     expect(completed[1].css('[data-user-estimate]')[1].css('[data-user-name]').map(&:text)).to eq ["user2"]
     expect(completed[1].css('[data-user-estimate]')[1].css('[data-user-estimates]').map(&:text)).to eq ["4/4/4"]
+
+    expect(completed[2].css('[data-user-estimate]').length).to eq 0
+
+    expect(completed[2].css('[data-estimation-name]').map(&:text)).to eq ["name2"]
+    expect(completed[2].css('[data-final-estimate]').map(&:text)).to eq ["-"]
   end
 
   it 'adds an estimation (in the default room)' do
