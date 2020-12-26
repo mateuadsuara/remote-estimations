@@ -19,7 +19,8 @@ module Web
         location = result.unwrap(room_url) do |failure_reason|
           "#{room_url}?error=#{failure_reason}"
         end
-        return redirect_to(location)
+        cookie_header = set_cookie(user: params[:user]) if params[:user]
+        return redirect_to(location, cookie_header)
       end
 
       if url == "/take_to_room"
@@ -86,12 +87,20 @@ module Web
       CGI::parse(environment["QUERY_STRING"])
     end
 
-    def redirect_to(location, additional_headers = {})
+    def redirect_to(location, additional_headers = nil)
+      additional_headers ||= {}
       ['302', {'Location' => location}.merge(additional_headers), []]
     end
 
     def ok(body)
       ['200', {'Content-Type' => 'text/html'}, [body]]
+    end
+
+    def set_cookie(values = {})
+      cookie = values.map do |k,v|
+        "#{k}=#{v}; Path=/; HttpOnly"
+      end.join("\n")
+      {'Set-Cookie' => cookie}
     end
   end
 end

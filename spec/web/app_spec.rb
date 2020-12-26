@@ -254,13 +254,17 @@ RSpec.describe Web::App do
       name: "::the name::"
     )
     expect(last_response.status).to eq(302)
-    expect(last_response.header['Location']).to eq('/')
+    expect(last_response.headers).to eq({
+      'Location'=>'/'
+    })
   end
 
   it 'submits an estimate (in the default room)' do
+    user = "::the user::"
+
     post "/estimate", {
       "name"=>"::the name::",
-      "user"=>"::the user::",
+      "user"=>user,
       "optimistic"=>"1",
       "realistic"=>"4",
       "pessimistic"=>"8"
@@ -269,14 +273,15 @@ RSpec.describe Web::App do
     expect(estimations).to have_received(:estimate).with(
       room: nil,
       name: "::the name::",
-      user: "::the user::",
+      user: user,
       optimistic: 1,
       realistic: 4,
       pessimistic: 8
     )
     expect(last_response.status).to eq(302)
     expect(last_response.headers).to eq({
-      'Location'=>'/'
+      'Location'=>'/',
+      'Set-Cookie'=>"user=#{user}; Path=/; HttpOnly"
     })
   end
 
