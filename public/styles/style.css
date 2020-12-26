@@ -100,7 +100,7 @@ div[data-error] {
   color: white;
 }
 
-[data-estimation-name] {
+[data-final-estimate], [data-user-estimates] {
   font-weight: 700;
 }
 
@@ -133,6 +133,22 @@ div[data-error] {
 .estimations-in-progress, .completed-estimations {
   display: flex;
   flex-wrap: wrap;
+}
+
+.completed-story:nth-child(1) {
+  opacity: 100%;
+}
+.completed-story:nth-child(2) {
+  opacity: 85%;
+}
+.completed-story:nth-child(3) {
+  opacity: 65%;
+}
+.completed-story:nth-child(4) {
+  opacity: 50%;
+}
+.completed-story:nth-child(n+5) {
+  opacity: 25%;
 }
 
 .completed-story, .estimation-in-progress {

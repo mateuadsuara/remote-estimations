@@ -80,12 +80,11 @@
         <div class="completed-estimations">
           <% completed_estimations.reverse.each do |estimation| %>
             <div class="completed-story" data-completed>
-              <p><span data-estimation-name><%= escape(estimation[:name]) %></span> has been estimated at <span data-final-estimate><%= estimation[:estimate] || "-" %></span> points.</p>
+              <p><span data-final-estimate><%= estimation[:estimate] || "-" %></span> points for <span data-estimation-name><%= escape(estimation[:name]) %></span>.</p>
               <ul>
                 <% estimation[:estimates].each do |user, estimate| %>
                   <li data-user-estimate>
-                    <span data-user-name><%= escape(user) %></span> estimated it as
-                    <span data-user-estimates><%= "#{estimate[:optimistic]}/#{estimate[:realistic]}/#{estimate[:pessimistic]}" %></span>
+                    <span data-user-estimates><%= "#{estimate[:optimistic]}/#{estimate[:realistic]}/#{estimate[:pessimistic]}" %></span> from <span data-user-name><%= escape(user) %></span>
                   </li>
                 <% end %>
               </ul>
