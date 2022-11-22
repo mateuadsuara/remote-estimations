@@ -13,7 +13,3 @@ A web application to allow remote teams to estimate stories
 ## Run tests with docker-compose
 
 `./test`
-
-## Demo
-
-Can be used from here: https://remote-estimate.herokuapp.com/
